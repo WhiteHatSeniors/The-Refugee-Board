@@ -44,7 +44,7 @@ class Refugee(db.Model):
     RefugeeID = db.Column(db.Integer, primary_key=True)
     CampID= db.Column(db.Integer, db.ForeignKey('camp.CampID'))
     Name = db.Column(db.String(140))
-    Gender = db.Column(db.String(1))
+    Gender = db.Column(db.String(15))
     Age = db.Column(db.Integer)
     CountryOfOrigin = db.Column(db.String(50))
     MessageDate = db.Column(db.DateTime(timezone=True), server_default=func.now())
@@ -161,6 +161,73 @@ def getAllRefugees():
         }
         refugees_list.append(refugee_details)
     return jsonify(refugees_list)
+
+# Getting the camp based on the campID
+@app.route('/api/get/camp/campID/<campID>',methods=["GET"])
+def getCampByCampID(campID):
+    # Getting the camp from the database
+    camp = Camp.query.filter_by(CampID=campID).first()
+    # Creating the camp details
+    camp_details = {
+        "CampID": camp.CampID,
+        "AdminName": camp.AdminName,
+        "CampName": camp.CampName,
+        "CampAddress": camp.CampAddress,
+        "NumberOfRefugees": camp.NumberOfRefugees,
+        "created_at": camp.created_at
+    }
+    return jsonify(camp_details)
+
+# Getting the camp based on the camp name
+@app.route('/api/get/camp/campName',methods=["POST"])
+def getCampByCampName():
+    # Getting the camp from the database
+    campName = request.get_json()
+    camp = Camp.query.filter_by(CampName=campName["CampName"]).first()
+    # Creating the camp details
+    camp_details = {
+        "CampID": camp.CampID,
+        "AdminName": camp.AdminName,
+        "CampName": camp.CampName,
+        "CampAddress": camp.CampAddress,
+        "NumberOfRefugees": camp.NumberOfRefugees,
+        "created_at": camp.created_at
+    }
+    return jsonify(camp_details)
+    
+
+# Dummy method to add all the data to the camp table
+@app.route('/api/post/camp/all',methods=["POST"])
+def addAllCamps():
+    return {"Not allowed":"Not allowed"}
+    camps = request.get_json()
+    for camp in camps:
+        new_camp = Camp(AdminName=camp["AdminName"],
+                    CampName=camp["CampName"],
+                    CampAddress=camp["CampAddress"],
+                    NumberOfRefugees=camp["NumberOfRefugees"])
+    
+        db.session.add(new_camp)
+        db.session.commit()
+    return jsonify(camps)
+
+# Dummy method to add all the data to the refugee table
+@app.route('/api/post/refugee/all',methods=["POST"])
+def addAllRefugees():
+    return {"Not allowed":"Not allowed"}
+    refugees = request.get_json()
+    for refugee in refugees:
+        new_refugee = Refugee(CampID= refugee["CampID"],
+                            Name = refugee["Name"],
+                            Gender = refugee["Gender"],
+                            Age = refugee["Age"],
+                            CountryOfOrigin = refugee["CountryOfOrigin"],
+                            Message = refugee["Message"])
+        db.session.add(new_refugee)
+        db.session.commit()
+    return jsonify(refugees)
+
+
 
 # Running the app
 if(__name__=="__main__"):
