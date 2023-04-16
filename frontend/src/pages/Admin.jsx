@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { FcSearch } from 'react-icons/fc';
-import Data from "../mock-data.json"
+// import Data from "../mock-data.json"
 import DataTable from '../components/DataTable';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 
@@ -20,8 +20,6 @@ function Admin() {
                 setInfo(response);
             })
             .catch(error => console.log(error))
-        setInfo(Data)
-        console.log(Data)
 
     }, [])
 
