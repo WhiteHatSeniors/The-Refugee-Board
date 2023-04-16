@@ -21,7 +21,8 @@ const TdData = ({ data, column }) => {
                         return <td className='p-5' key={data[v]} >{data[v] === "" ? "none" : data[v]}</td>
                     })
                 }
-                <button className='bg-red-600 p-1 m-2 rounded-xl' onClick={(e) => deleteEntry && deleteEntry(data[ind].RefugeeID)}>Delete</button><button className='bg-green-500 p-1 m-2 rounded-xl' onClick={(e) => editEntry && editEntry(data[ind].RefugeeID)}>edit</button>
+                {deleteEntry && <button className='bg-red-600 p-1 m-2 rounded-xl' onClick={(e) => deleteEntry(data[ind].RefugeeID)}>Delete</button>}
+                {editEntry && <button className='bg-green-500 p-1 m-2 rounded-xl' onClick={(e) => editEntry(data[ind].RefugeeID)}>edit</button>}
             </tr>
         )
     })
