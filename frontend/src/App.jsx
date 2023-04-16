@@ -9,6 +9,17 @@ function App() {
   const [isActive, setActive] = useState(false)
   const [info, setInfo] = useOutletContext()
 
+  useEffect(() => {
+    fetch('http://127.0.0.1:5000/api/get/all/refugees')
+      .then(response => response.json())
+      .then(response => {
+        console.log(response)
+        setInfo(response);
+      })
+      .catch(error => console.log(error))
+
+  }, [])
+
   // useEffect(() => {
   //   // fetch('http://127.0.0.1:5000/api/get')
   //   // fetch('mock-data.json')

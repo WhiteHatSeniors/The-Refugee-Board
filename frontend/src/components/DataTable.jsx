@@ -45,7 +45,7 @@ export default function DataTable({ data, query, deleteEntry, editEntry }) {
                 </tbody>
             </table>
         )
-    } else return <p>No information for now</p>
+    } else return <p className='text-red-500'>No information for now</p>
 
 }
 // data.map((post, index) => (
