@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from flask_migrate import Migrate 
+from datetime import datetime
 
 # load_dotenv()
 app = Flask(__name__)
@@ -195,7 +196,6 @@ def getCampByCampName():
     }
     return jsonify(camp_details)
     
-
 # Dummy method to add all the data to the camp table
 @app.route('/api/post/camp/all',methods=["POST"])
 def addAllCamps():
@@ -227,7 +227,24 @@ def addAllRefugees():
         db.session.commit()
     return jsonify(refugees)
 
+# Updating a refugees details
+@app.route('/api/update/refugee',methods=["POST"])
+def updateRefugee():
+    # Recieving details of the refugee
+    refugee = Refugee.query.get_or_404(request.form["RefugeeID"])
 
+    if request.method == 'POST':
+        refugee.Name = request.form['Name']
+        refugee.Gender = request.form['Gender']
+        refugee.CountryOfOrigin = request.form['CountryOfOrigin']
+        refugee.Age = int(request.form['Age'])
+        refugee.Message = request.form['Message']
+        refugee.MessageDate = datetime.now()
+
+        db.session.add(refugee)
+        db.session.commit()
+
+        return jsonify({"RefugeeID": refugee.RefugeeID, "Success":"Thumbs up"})
 
 # Running the app
 if(__name__=="__main__"):
