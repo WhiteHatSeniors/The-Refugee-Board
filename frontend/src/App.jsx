@@ -48,7 +48,7 @@ function App() {
           <FcSearch className='text-center inline-block text-4xl ' />
         </div>
         {/* {JSON.stringify(Data)} */}
-        <DataTable data={info} query={query} />
+        <DataTable data={info} query={query} deleteEntry={0} editEntry={0} />
       </div>
     </div>
   )
