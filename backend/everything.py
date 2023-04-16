@@ -74,13 +74,12 @@ def createNewRefugee():
     # Recieving details of the refugee
     refugee_details = request.get_json()
     # Creating a new refugee object
-    new_refugee = Refugee(RefugeeID = refugee_details["RefugeeID"],
-                       CampID= refugee_details["CampID"],
-                       Name = refugee_details["Name"],
-                       Gender = refugee_details["Gender"],
-                       Age = refugee_details["Age"],
-                       CountryOfOrigin = refugee_details["CountryOfOrigin"],
-                       Message = refugee_details["Message"])
+    new_refugee = Refugee(CampID= refugee_details["CampID"],
+                            Name = refugee_details["Name"],
+                            Gender = refugee_details["Gender"],
+                            Age = refugee_details["Age"],
+                            CountryOfOrigin = refugee_details["CountryOfOrigin"],
+                            Message = refugee_details["Message"])
     db.session.add(new_refugee)
     db.session.commit()
     return jsonify(refugee_details)
