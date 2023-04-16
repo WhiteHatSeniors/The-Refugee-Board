@@ -10,7 +10,7 @@ function CreateEntry() {
 
     const [info, setInfo] = useOutletContext()
     const subHandler = async (e) => {
-        const res = await fetch("http://localhost:5000/api/post", {
+        const res = await fetch("http://localhost:5000/api/post/refugee", {
             method: "POST",
             headers: {
                 "Content-type": "application/json",

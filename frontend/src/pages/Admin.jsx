@@ -13,7 +13,7 @@ function Admin() {
     const navigate = useNavigate()
 
     useEffect(() => {
-        fetch('http://127.0.0.1:5000/api/get')
+        fetch('http://127.0.0.1:5000/api/get/all/refugees')
             .then(response => response.json())
             .then(response => {
                 console.log(response)
@@ -26,11 +26,12 @@ function Admin() {
     }, [])
 
     const editEntry = (id) => {
+        fetch('http://127.0.0.1:5000/api/update/refugee')
         console.log('Editing ' + id)
     }
 
     const deleteEntry = async (id) => {
-        fetch('http://127.0.0.1:5000/api/delete')
+        fetch('http://127.0.0.1:5000/api/delete/refugee')
             .then(response => response.json())
             .then(response => {
                 setInfo((prev) => prev.filter(ele => ele.RefugeeID != id))
