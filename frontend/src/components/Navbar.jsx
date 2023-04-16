@@ -4,8 +4,8 @@ import logo from "../assets/TRB.png"
 console.log(logo)
 function Navbar() {
     return (
-        <nav className='bg-yellow-100 flex justify-evenly'>
-            <Link to='/' className='font-bold '>trb</Link>
+        <nav className='bg-yellow-100 flex justify-evenly p-4'>
+            <Link to='/' className='font-bold text-2xl'>trb</Link>
             <Link to='/admin'>Dashboard</Link>
             <Link to='/about'>About us</Link>
             <Link to='/login'>Login</Link>
