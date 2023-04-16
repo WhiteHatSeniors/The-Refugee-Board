@@ -24,12 +24,19 @@ function Admin() {
     }, [])
 
     const editEntry = (id) => {
-        fetch('http://127.0.0.1:5000/api/update/refugee')
+        // fetch('http://127.0.0.1:5000/api/update/refugee')
         console.log('Editing ' + id)
     }
 
     const deleteEntry = async (id) => {
-        fetch('http://127.0.0.1:5000/api/delete/refugee')
+        fetch('http://127.0.0.1:5000/api/delete/refugee', {
+            method: "DELETE",
+            headers: {
+                "Content-type": "application/json",
+            }
+            ,
+            body: JSON.stringify({ RefugeeID: id })
+        })
             .then(response => response.json())
             .then(response => {
                 setInfo((prev) => prev.filter(ele => ele.RefugeeID != id))
