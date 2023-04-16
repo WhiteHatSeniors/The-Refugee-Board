@@ -29,21 +29,24 @@ const TdData = ({ data, column }) => {
 }
 
 export default function DataTable({ data, query, deleteEntry, editEntry }) {
-    let column = Object.keys(data[0]);
-    column = column.filter(el => (el != "RefugeeID" && el != "CampID"))
+    if (data) {
+        let column = Object.keys(data[0]);
+        column = column.filter(el => (el != "RefugeeID" && el != "CampID"))
 
-    console.log(data)
+        console.log(data)
 
-    return (
-        <table className="table text-center mx-auto border-black border-4 my-16">
-            <thead className='border-b-black border-2'>
-                <tr><ThData column={column} /></tr>
-            </thead>
-            <tbody>
-                <TdData data={data} column={column} deleteEntry={deleteEntry} editEntry={editEntry} />
-            </tbody>
-        </table>
-    )
+        return (
+            <table className="table text-center mx-auto border-black border-4 my-16">
+                <thead className='border-b-black border-2'>
+                    <tr><ThData column={column} /></tr>
+                </thead>
+                <tbody>
+                    <TdData data={data} column={column} deleteEntry={deleteEntry} editEntry={editEntry} />
+                </tbody>
+            </table>
+        )
+    } else return <p>No information for now</p>
+
 }
 // data.map((post, index) => (
 //     <div key={index}>
