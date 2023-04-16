@@ -3,7 +3,9 @@ from flask import Flask,jsonify,request
 from flask_cors import CORS
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import select
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from flask_migrate import Migrate 
 
 # load_dotenv()
@@ -30,7 +32,8 @@ class Camp(db.Model):
     CampAddress = db.Column(db.String(90))
     NumberOfRefugees = db.Column(db.Integer)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    # refugees = db.relationship("Refugee")
+    
+    refugees = relationship("Refugee",cascade="all, delete-orphan") # On Delete Cascade
 
     def __repr__(self):
          return '<Camp Details {self.title}>'
@@ -44,8 +47,9 @@ class Refugee(db.Model):
     Gender = db.Column(db.String(1))
     Age = db.Column(db.Integer)
     CountryOfOrigin = db.Column(db.String(50))
-    MessageDate = db.Column(db.DateTime(timezone=True), server_default=func.now()) # Check this btw, does it set the now time?
+    MessageDate = db.Column(db.DateTime(timezone=True), server_default=func.now())
     Message = db.Column(db.String(1000))
+
     
 
     def __repr__(self):
@@ -54,6 +58,7 @@ class Refugee(db.Model):
 with app.app_context():  
     db.create_all()
 
+# Creating a new camp
 @app.route('/api/post/camp',methods=["POST"])
 def createNewCamp():
     # Recieving details of the camp
@@ -68,7 +73,7 @@ def createNewCamp():
     db.session.commit()
     return jsonify(camp_details)
 
-
+# Adding a refugee
 @app.route('/api/post/refugee',methods=["POST"])
 def createNewRefugee():
     # Recieving details of the refugee
@@ -84,7 +89,78 @@ def createNewRefugee():
     db.session.commit()
     return jsonify(refugee_details)
 
-    
+# Deleting a refugee
+@app.route('/api/delete/refugee',methods=["POST"])
+def deleteRefugee():
+    # Recieving details of the refugee
+    refugee_details = request.get_json()
+    # Getting the refugee object from the database
+    # Look up the refugeeID in the refugee table
+    refugee_to_delete = db.session.execute(db.select(Refugee).filter_by(Name=refugee_details["Name"])).scalar_one()
+    db.session.delete(refugee_to_delete)
+    deletedRefugee = {
+        "RefugeeID": refugee_to_delete.RefugeeID,
+        "CampID": refugee_to_delete.CampID,
+        "Name": refugee_to_delete.Name,
+        "Age": refugee_to_delete.Age,
+        "Gender": refugee_to_delete.Gender,
+        "CountryOfOrigin": refugee_to_delete.CountryOfOrigin,
+        "Message": refugee_to_delete.Message,
+        "MessageDate": refugee_to_delete.MessageDate
+    }
+    db.session.commit()
+    return jsonify(refugee_details)
+
+# Deleting a camp
+@app.route('/api/delete/camp',methods=["POST"])
+def deleteCamp():
+    # Recieving details of the camp
+    camp_details = request.get_json()
+    # Getting the camp object from the database
+    camp_to_delete = Camp.query.filter_by(CampID=camp_details["CampID"]).first()
+    db.session.delete(camp_to_delete)
+    db.session.commit()
+    return jsonify(camp_details)
+
+# Getting all the camps
+@app.route('/api/get/all/camps',methods=["POST"])
+def getAllCamps():
+    # Getting all the camps from the database
+    camps = Camp.query.all()
+    # Creating a list of all the camps
+    camps_list = []
+    for camp in camps:
+        camp_details = {
+            "CampID": camp.CampID,
+            "AdminName": camp.AdminName,
+            "CampName": camp.CampName,
+            "CampAddress": camp.CampAddress,
+            "NumberOfRefugees": camp.NumberOfRefugees,
+            "created_at": camp.created_at
+        }
+        camps_list.append(camp_details)
+    return jsonify(camps_list)
+
+# Getting all the refugees
+@app.route('/api/get/all/refugees',methods=["POST"])
+def getAllRefugees():
+    # Getting all the refugees from the database
+    refugees = Refugee.query.all()
+    # Creating a list of all the refugees
+    refugees_list = []
+    for refugee in refugees:
+        refugee_details = {
+            "RefugeeID": refugee.RefugeeID,
+            "CampID": refugee.CampID,
+            "Name": refugee.Name,
+            "Age": refugee.Age,
+            "Gender": refugee.Gender,
+            "CountryOfOrigin": refugee.CountryOfOrigin,
+            "Message": refugee.Message,
+            "MessageDate": refugee.MessageDate
+        }
+        refugees_list.append(refugee_details)
+    return jsonify(refugees_list)
 
 # Running the app
 if(__name__=="__main__"):
