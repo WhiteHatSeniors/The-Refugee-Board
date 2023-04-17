@@ -97,7 +97,7 @@ def deleteRefugee():
     refugee_details = request.get_json()
     # Getting the refugee object from the database
     # Look up the refugeeID in the refugee table
-    refugee_to_delete = db.session.execute(db.select(Refugee).filter_by(Name=refugee_details["Name"])).scalar_one()
+    refugee_to_delete = db.session.execute(db.select(Refugee).filter_by(RefugeeID=refugee_details["RefugeeID"])).scalar_one()
     db.session.delete(refugee_to_delete)
     deletedRefugee = {
         "RefugeeID": refugee_to_delete.RefugeeID,
@@ -143,7 +143,7 @@ def getAllCamps():
     return jsonify(camps_list)
 
 # Getting all the refugees
-@app.route('/api/get/all/refugees',methods=["POST"])
+@app.route('/api/get/all/refugees',methods=["GET"])
 def getAllRefugees():
     # Getting all the refugees from the database
     refugees = Refugee.query.all()
