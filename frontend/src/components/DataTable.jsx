@@ -38,7 +38,7 @@ const TdData = ({ data, column, deleteEntry, editEntry }) => {
 
 export default function DataTable({ data, query, deleteEntry, editEntry }) {
     // console.log(data)
-    // if (data) {
+
     // User is currently on this page
     const [currentPage, setCurrentPage] = useState(1);
     const recordsPerPage = 7;
@@ -47,28 +47,28 @@ export default function DataTable({ data, query, deleteEntry, editEntry }) {
 
     const indexOfLastRecord = currentPage * recordsPerPage;
     const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-    const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
+    const currentRecords = !data ? "" : data.slice(indexOfFirstRecord, indexOfLastRecord);
 
-    let column = Object.keys(data[0]);
-    column = column.filter(el => (el != "RefugeeID" && el != "CampID"))
 
     console.log(data)
-
-    return (
-        <div>
-            <table className="table text-center mx-auto border-black border-4 my-16">
-                <thead className='border-b-black border-2'>
-                    <tr><ThData column={column} /></tr>
-                </thead>
-                <tbody>
-                    <TdData data={currentRecords} column={column} deleteEntry={deleteEntry} editEntry={editEntry} />
-                </tbody>
-            </table>
-            < Pagination nPages={nPages} currentPage={currentPage} setCurrentPage={setCurrentPage} />
-        </div>
-    )
-    // } 
-    // else return <p className='text-red-500'>No information for now</p>
+    if (data) {
+        let column = Object.keys(data[0]);
+        column = column.filter(el => (el != "RefugeeID" && el != "CampID"))
+        return (
+            <div>
+                <table className="table text-center mx-auto border-black border-4 my-16">
+                    <thead className='border-b-black border-2'>
+                        <tr><ThData column={column} /></tr>
+                    </thead>
+                    <tbody>
+                        <TdData data={currentRecords} column={column} deleteEntry={deleteEntry} editEntry={editEntry} />
+                    </tbody>
+                </table>
+                < Pagination nPages={nPages} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+            </div>
+        )
+    }
+    else return <p className='text-red-500'>No information for now</p>
 
 }
 // data.map((post, index) => (

@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom'
 
 function Root() {
     const [info, setInfo] = useState(null);
-
+    console.log('In the root')
     useEffect(() => {
         fetch('http://127.0.0.1:5000/api/get/all/refugees')
             .then(response => response.json())

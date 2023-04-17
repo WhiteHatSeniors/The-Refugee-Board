@@ -5,23 +5,22 @@ import DataTable from '../components/DataTable';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 
 function Admin() {
-    const [count, setCount] = useState(0)
     const [isActive, setActive] = useState(false)
     const [query, setQuery] = useState("")
     const [info, setInfo] = useOutletContext()
 
     const navigate = useNavigate()
 
-    useEffect(() => {
-        fetch('http://127.0.0.1:5000/api/get/all/refugees')
-            .then(response => response.json())
-            .then(response => {
-                console.log(response)
-                setInfo(response);
-            })
-            .catch(error => console.log(error))
+    // useEffect(() => {
+    //     fetch('http://127.0.0.1:5000/api/get/all/refugees')
+    //         .then(response => response.json())
+    //         .then(response => {
+    //             console.log(response)
+    //             setInfo(response);
+    //         })
+    //         .catch(error => console.log(error))
 
-    }, [])
+    // }, [])
 
     const editEntry = (id) => {
         // fetch('http://127.0.0.1:5000/api/update/refugee')
