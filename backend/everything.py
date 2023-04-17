@@ -98,26 +98,26 @@ def createNewRefugee():
     return jsonify(refugee_details)
 
 # Deleting a refugee
-@app.route('/api/delete/refugee',methods=["POST"])
-def deleteRefugee():
+@app.route('/api/delete/refugee/<id>',methods=["DELETE"])
+def deleteRefugee(id):
     # Recieving details of the refugee
-    refugee_details = request.get_json()
     # Getting the refugee object from the database
     # Look up the refugeeID in the refugee table
-    refugee_to_delete = db.session.execute(db.select(Refugee).filter_by(Name=refugee_details["Name"])).scalar_one()
-    db.session.delete(refugee_to_delete)
+    # refugee_to_delete = db.session.execute(db.select(Refugee).filter_by(Name=refugee_details["Name"])).scalar_one()
+    ref = Refugee.query.get(id)
+    db.session.delete(ref)
     deletedRefugee = {
-        "RefugeeID": refugee_to_delete.RefugeeID,
-        "CampID": refugee_to_delete.CampID,
-        "Name": refugee_to_delete.Name,
-        "Age": refugee_to_delete.Age,
-        "Gender": refugee_to_delete.Gender,
-        "CountryOfOrigin": refugee_to_delete.CountryOfOrigin,
-        "Message": refugee_to_delete.Message,
-        "MessageDate": refugee_to_delete.MessageDate
+        "RefugeeID": ref.RefugeeID,
+        "CampID": ref.CampID,
+        "Name": ref.Name,
+        "Age": ref.Age,
+        "Gender": ref.Gender,
+        "CountryOfOrigin": ref.CountryOfOrigin,
+        "Message": ref.Message,
+        "MessageDate": ref.MessageDate
     }
     db.session.commit()
-    return jsonify(refugee_details)
+    return jsonify(deletedRefugee)
 
 # Deleting a camp
 @app.route('/api/delete/camp',methods=["POST"])

@@ -15,6 +15,8 @@ const ThData = ({ column }) => column.map((data, id) => <th key={id} className='
 
 const TdData = ({ data, column, deleteEntry, editEntry }) => {
     if (data) {
+        console.log(data)
+        console.log(column)
         return data.map((data, id) => {
             return (
                 <tr key={id}>
@@ -23,8 +25,8 @@ const TdData = ({ data, column, deleteEntry, editEntry }) => {
                             return <td className='p-5' key={ind} >{data[v] === "" ? "none" : data[v]}</td>
                         })
                     }
-                    {deleteEntry && <td><button className='bg-red-600 p-1 m-2 rounded-xl' onClick={(e) => deleteEntry(data[ind].RefugeeID)}>Delete</button></td>}
-                    {editEntry && <td><button className='bg-green-500 p-1 m-2 rounded-xl' onClick={(e) => editEntry(data[ind].RefugeeID)}>edit</button></td>}
+                    {deleteEntry && <td><button className='bg-red-600 p-1 m-2 rounded-xl' onClick={(e) => deleteEntry(data.RefugeeID)}>Delete</button></td>}
+                    {editEntry && <td><button className='bg-green-500 p-1 m-2 rounded-xl' onClick={(e) => editEntry(data.RefugeeID)}>edit</button></td>}
                 </tr>
             )
         })

@@ -29,13 +29,11 @@ function Admin() {
     }
 
     const deleteEntry = async (id) => {
-        fetch('http://127.0.0.1:5000/api/delete/refugee', {
+        fetch(`http://127.0.0.1:5000/api/delete/refugee/${id}`, {
             method: "DELETE",
             headers: {
                 "Content-type": "application/json",
             }
-            ,
-            body: JSON.stringify({ RefugeeID: id })
         })
             .then(response => response.json())
             .then(response => {
