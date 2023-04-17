@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
+import Pagination from './Pagination';
+
 
 function capitalizeFirstLetter(str) {
 
@@ -9,43 +11,62 @@ function capitalizeFirstLetter(str) {
 }
 
 
-const ThData = ({ column }) => column.map((data, id) => <th key={data} className='p-5'>{capitalizeFirstLetter(data.replace(/([A-Z])/g, ' $1').trim())}</th>)
+const ThData = ({ column }) => column.map((data, id) => <th key={id} className='p-5'>{capitalizeFirstLetter(data.replace(/([A-Z])/g, ' $1').trim())}</th>)
 
 const TdData = ({ data, column, deleteEntry, editEntry }) => {
+    if (data) {
+        return data.map((data, id) => {
+            return (
+                <tr key={id}>
+                    {
+                        column.map((v, ind) => {
+                            return <td className='p-5' key={ind} >{data[v] === "" ? "none" : data[v]}</td>
+                        })
+                    }
+                    {deleteEntry && <td><button className='bg-red-600 p-1 m-2 rounded-xl' onClick={(e) => deleteEntry(data[ind].RefugeeID)}>Delete</button></td>}
+                    {editEntry && <td><button className='bg-green-500 p-1 m-2 rounded-xl' onClick={(e) => editEntry(data[ind].RefugeeID)}>edit</button></td>}
+                </tr>
+            )
+        })
+    }
 
-    return data.map((data, id) => {
-        return (
-            <tr key={Math.random()}>
-                {
-                    column.map((v) => {
-                        return <td className='p-5' key={data[v]} >{data[v] === "" ? "none" : data[v]}</td>
-                    })
-                }
-                {deleteEntry && <button className='bg-red-600 p-1 m-2 rounded-xl' onClick={(e) => deleteEntry(data[ind].RefugeeID)}>Delete</button>}
-                {editEntry && <button className='bg-green-500 p-1 m-2 rounded-xl' onClick={(e) => editEntry(data[ind].RefugeeID)}>edit</button>}
-            </tr>
-        )
-    })
 }
 
+
+
 export default function DataTable({ data, query, deleteEntry, editEntry }) {
-    if (data) {
-        let column = Object.keys(data[0]);
-        column = column.filter(el => (el != "RefugeeID" && el != "CampID"))
+    // console.log(data)
+    // if (data) {
+    // User is currently on this page
+    const [currentPage, setCurrentPage] = useState(1);
+    const recordsPerPage = 7;
+    const nPages = !data ? 0 : Math.ceil(data.length / recordsPerPage);
+    console.log(data)
 
-        console.log(data)
+    const indexOfLastRecord = currentPage * recordsPerPage;
+    const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+    const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
 
-        return (
+    let column = Object.keys(data[0]);
+    column = column.filter(el => (el != "RefugeeID" && el != "CampID"))
+
+    console.log(data)
+
+    return (
+        <div>
             <table className="table text-center mx-auto border-black border-4 my-16">
                 <thead className='border-b-black border-2'>
                     <tr><ThData column={column} /></tr>
                 </thead>
                 <tbody>
-                    <TdData data={data} column={column} deleteEntry={deleteEntry} editEntry={editEntry} />
+                    <TdData data={currentRecords} column={column} deleteEntry={deleteEntry} editEntry={editEntry} />
                 </tbody>
             </table>
-        )
-    } else return <p className='text-red-500'>No information for now</p>
+            < Pagination nPages={nPages} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+        </div>
+    )
+    // } 
+    // else return <p className='text-red-500'>No information for now</p>
 
 }
 // data.map((post, index) => (

@@ -1,6 +1,6 @@
 import os
 from flask import Flask,jsonify,request
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select
@@ -14,7 +14,6 @@ app = Flask(__name__)
 CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-CORS(app, resources={r"/*": {"origins": "*"}})  
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
@@ -80,11 +79,15 @@ def createNewCamp():
 
 # Adding a refugee
 @app.route('/api/post/refugee',methods=["POST"])
+@cross_origin()
 def createNewRefugee():
     # Recieving details of the refugee
     refugee_details = request.get_json()
     # Creating a new refugee object
-    new_refugee = Refugee(CampID= refugee_details["CampID"],
+    print("Ref details: ",refugee_details)
+    new_refugee = Refugee(CampID= 1 
+                        #   or refugee_details["CampID"]
+                          ,
                             Name = refugee_details["Name"],
                             Gender = refugee_details["Gender"],
                             Age = refugee_details["Age"],
@@ -216,12 +219,14 @@ def addAllCamps():
     return jsonify(camps)
 
 # Dummy method to add all the data to the refugee table
-@app.route('/api/post/refugee/all',methods=["POST","OPTIONS"])
+@app.route('/api/post/refugee/all',methods=["POST"])
+@cross_origin()
 def addAllRefugees():
     # return {"Not allowed":"Not allowed"}
     refugees = request.get_json()
+    print(refugees)
     for refugee in refugees:
-        new_refugee = Refugee(CampID= refugee["CampID"],
+        new_refugee = Refugee(CampID= 1, #   or refugee_details["CampID"]
                             Name = refugee["Name"],
                             Gender = refugee["Gender"],
                             Age = refugee["Age"],
