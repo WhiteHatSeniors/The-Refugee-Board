@@ -11,7 +11,7 @@ function capitalizeFirstLetter(str) {
 
 const ThData = ({ column }) => column.map((data, id) => <th key={data} className='p-5'>{capitalizeFirstLetter(data.replace(/([A-Z])/g, ' $1').trim())}</th>)
 
-const TdData = ({ data, column }) => {
+const TdData = ({ data, column, deleteEntry, editEntry }) => {
 
     return data.map((data, id) => {
         return (

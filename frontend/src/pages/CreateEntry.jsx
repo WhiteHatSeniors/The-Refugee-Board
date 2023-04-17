@@ -10,20 +10,26 @@ function CreateEntry() {
 
     const [info, setInfo] = useOutletContext()
     const subHandler = async (e) => {
-        const res = await fetch("http://localhost:5000/api/post/refugee", {
-            method: "POST",
-            headers: {
-                "Content-type": "application/json",
-            },
-            body: JSON.stringify({
+        try {
+            e.preventDefault()
+            const res = await fetch("http://127.0.0.1:5000/api/post/refugee/all", {
+                method: "POST",
+                headers: {
+                    "Content-type": "application/json",
+                },
+                body: JSON.stringify({
+                    Age: age, Name: name, Gender: gender, CountryOfOrigin: origin, Message: message
+                }),
+            });
+            const info = {
                 Age: age, Name: name, Gender: gender, CountryOfOrigin: origin, Message: message
-            }),
-        });
-        const info = {
-            Age: age, Name: name, Gender: gender, CountryOfOrigin: origin, Message: message
+            }
+            const data = await res.json();
+            setInfo(prev => { return { ...prev, info } })
+        } catch (err) {
+            console.log(err)
         }
-        const data = await res.json();
-        setInfo(prev => { return { ...prev, info } })
+
     }
 
 

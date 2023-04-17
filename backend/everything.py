@@ -9,14 +9,18 @@ from sqlalchemy.orm import relationship
 from flask_migrate import Migrate 
 from datetime import datetime
 
-# load_dotenv()
+load_dotenv()
 app = Flask(__name__)
 CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
+CORS(app, resources={r"/*": {"origins": "*"}})  
+
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:12345678@localhost/therefugeeboard"
-SQLALCHEMY_TRACK_MODIFICATIONS = False
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+# "mysql://root:12345678@localhost/therefugeeboard"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
@@ -143,7 +147,7 @@ def getAllCamps():
     return jsonify(camps_list)
 
 # Getting all the refugees
-@app.route('/api/get/all/refugees',methods=["POST"])
+@app.route('/api/get/all/refugees',methods=["GET"])
 def getAllRefugees():
     # Getting all the refugees from the database
     refugees = Refugee.query.all()
@@ -199,7 +203,7 @@ def getCampByCampName():
 # Dummy method to add all the data to the camp table
 @app.route('/api/post/camp/all',methods=["POST"])
 def addAllCamps():
-    return {"Not allowed":"Not allowed"}
+    # return {"Not allowed":"Not allowed"}
     camps = request.get_json()
     for camp in camps:
         new_camp = Camp(AdminName=camp["AdminName"],
@@ -212,9 +216,9 @@ def addAllCamps():
     return jsonify(camps)
 
 # Dummy method to add all the data to the refugee table
-@app.route('/api/post/refugee/all',methods=["POST"])
+@app.route('/api/post/refugee/all',methods=["POST","OPTIONS"])
 def addAllRefugees():
-    return {"Not allowed":"Not allowed"}
+    # return {"Not allowed":"Not allowed"}
     refugees = request.get_json()
     for refugee in refugees:
         new_refugee = Refugee(CampID= refugee["CampID"],

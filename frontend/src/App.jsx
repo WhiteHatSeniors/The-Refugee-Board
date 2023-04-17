@@ -15,8 +15,7 @@ function App() {
       .then(response => {
         console.log(response)
         setInfo(response);
-      })
-      .catch(error => console.log(error))
+      }).catch(error => console.log(error))
 
   }, [])
 
@@ -48,7 +47,7 @@ function App() {
           <FcSearch className='text-center inline-block text-4xl ' />
         </div>
         {/* {JSON.stringify(Data)} */}
-        <DataTable data={info} query={query} deleteEntry={0} editEntry={0} />
+        <DataTable data={info} query={query} deleteEntry={undefined} editEntry={undefined} />
       </div>
     </div>
   )

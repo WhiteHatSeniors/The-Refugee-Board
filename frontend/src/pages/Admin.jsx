@@ -59,7 +59,7 @@ function Admin() {
                 </div>
                 {/* {JSON.stringify(Data)} */}
                 {
-                    info && <DataTable data={info} query={query} deleteEntry={deleteEntry == undefined ? deleteEntry : ''} editEntry={editEntry == undefined ? deleteEntry : ''} />
+                    info && <DataTable data={info} query={query} deleteEntry={deleteEntry == undefined ? '' : deleteEntry} editEntry={editEntry == undefined ? '' : editEntry} />
                 }
                 {
                     !info && <h1>No data for now:(</h1>
