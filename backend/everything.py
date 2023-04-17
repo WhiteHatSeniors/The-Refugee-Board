@@ -1,6 +1,6 @@
 import os
 from flask import Flask,jsonify,request
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select
@@ -9,14 +9,17 @@ from sqlalchemy.orm import relationship
 from flask_migrate import Migrate 
 from datetime import datetime
 
-# load_dotenv()
+load_dotenv()
 app = Flask(__name__)
 CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
+
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:12345678@localhost/therefugeeboard"
-SQLALCHEMY_TRACK_MODIFICATIONS = False
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+# "mysql://root:12345678@localhost/therefugeeboard"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
@@ -76,11 +79,15 @@ def createNewCamp():
 
 # Adding a refugee
 @app.route('/api/post/refugee',methods=["POST"])
+@cross_origin()
 def createNewRefugee():
     # Recieving details of the refugee
     refugee_details = request.get_json()
     # Creating a new refugee object
-    new_refugee = Refugee(CampID= refugee_details["CampID"],
+    print("Ref details: ",refugee_details)
+    new_refugee = Refugee(CampID= 1 
+                        #   or refugee_details["CampID"]
+                          ,
                             Name = refugee_details["Name"],
                             Gender = refugee_details["Gender"],
                             Age = refugee_details["Age"],
@@ -91,26 +98,26 @@ def createNewRefugee():
     return jsonify(refugee_details)
 
 # Deleting a refugee
-@app.route('/api/delete/refugee',methods=["POST"])
-def deleteRefugee():
+@app.route('/api/delete/refugee/<id>',methods=["DELETE"])
+def deleteRefugee(id):
     # Recieving details of the refugee
-    refugee_details = request.get_json()
     # Getting the refugee object from the database
     # Look up the refugeeID in the refugee table
-    refugee_to_delete = db.session.execute(db.select(Refugee).filter_by(RefugeeID=refugee_details["RefugeeID"])).scalar_one()
-    db.session.delete(refugee_to_delete)
+    # refugee_to_delete = db.session.execute(db.select(Refugee).filter_by(Name=refugee_details["Name"])).scalar_one()
+    ref = Refugee.query.get(id)
+    db.session.delete(ref)
     deletedRefugee = {
-        "RefugeeID": refugee_to_delete.RefugeeID,
-        "CampID": refugee_to_delete.CampID,
-        "Name": refugee_to_delete.Name,
-        "Age": refugee_to_delete.Age,
-        "Gender": refugee_to_delete.Gender,
-        "CountryOfOrigin": refugee_to_delete.CountryOfOrigin,
-        "Message": refugee_to_delete.Message,
-        "MessageDate": refugee_to_delete.MessageDate
+        "RefugeeID": ref.RefugeeID,
+        "CampID": ref.CampID,
+        "Name": ref.Name,
+        "Age": ref.Age,
+        "Gender": ref.Gender,
+        "CountryOfOrigin": ref.CountryOfOrigin,
+        "Message": ref.Message,
+        "MessageDate": ref.MessageDate
     }
     db.session.commit()
-    return jsonify(refugee_details)
+    return jsonify(deletedRefugee)
 
 # Deleting a camp
 @app.route('/api/delete/camp',methods=["POST"])
@@ -199,7 +206,7 @@ def getCampByCampName():
 # Dummy method to add all the data to the camp table
 @app.route('/api/post/camp/all',methods=["POST"])
 def addAllCamps():
-    return {"Not allowed":"Not allowed"}
+    # return {"Not allowed":"Not allowed"}
     camps = request.get_json()
     for camp in camps:
         new_camp = Camp(AdminName=camp["AdminName"],
@@ -213,11 +220,13 @@ def addAllCamps():
 
 # Dummy method to add all the data to the refugee table
 @app.route('/api/post/refugee/all',methods=["POST"])
+@cross_origin()
 def addAllRefugees():
-    return {"Not allowed":"Not allowed"}
+    # return {"Not allowed":"Not allowed"}
     refugees = request.get_json()
+    print(refugees)
     for refugee in refugees:
-        new_refugee = Refugee(CampID= refugee["CampID"],
+        new_refugee = Refugee(CampID= 1, #   or refugee_details["CampID"]
                             Name = refugee["Name"],
                             Gender = refugee["Gender"],
                             Age = refugee["Age"],
