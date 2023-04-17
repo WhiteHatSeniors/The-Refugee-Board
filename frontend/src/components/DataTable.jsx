@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Pagination from './Pagination';
 
+const col = ["Name", "Gender", "CountryOfOrigin", "Age", "Message", "MessageDate"]
 
 function capitalizeFirstLetter(str) {
 
@@ -58,10 +59,10 @@ export default function DataTable({ data, query, deleteEntry, editEntry }) {
             <div>
                 <table className="table text-center mx-auto border-black border-4 my-16">
                     <thead className='border-b-black border-2'>
-                        <tr><ThData column={column} /></tr>
+                        <tr><ThData column={col} /></tr>
                     </thead>
                     <tbody>
-                        <TdData data={currentRecords} column={column} deleteEntry={deleteEntry} editEntry={editEntry} />
+                        <TdData data={currentRecords} column={col} deleteEntry={deleteEntry} editEntry={editEntry} />
                     </tbody>
                 </table>
                 < Pagination nPages={nPages} currentPage={currentPage} setCurrentPage={setCurrentPage} />
