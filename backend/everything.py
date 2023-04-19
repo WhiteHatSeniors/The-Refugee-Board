@@ -307,7 +307,7 @@ def getAllRefugees():
         refugees_list.append(refugee_details)
     return jsonify(refugees_list)
 
-# Getting the camp based on the campID
+# Getting the camp based on the campID or campName
 @app.route('/api/get/camp',methods=["GET"])
 def getCamp():
     '''NOTE: This method prioritizes the campID over the campName'''
@@ -318,6 +318,8 @@ def getCamp():
     if campID is None:
         # Find camp by its name
         campName = args.get("campName")
+        if campName is None:
+            return jsonify({"error": "Camp not found, No parameters were given"}),404
         camp = Camp.query.filter_by(CampName=campName).first()
     else:
         # Find camp by its ID
@@ -373,8 +375,9 @@ def addAllRefugees():
     return jsonify(refugees)
 
 # Updating a refugees details
-@app.route('/api/update/refugee',methods=["POST"])
+@app.route('/api/update/refugee',methods=["PATCH"])
 def updateRefugee():
+    #### NEEDS REWORKING
     # Recieving details of the refugee
     refugee = Refugee.query.get_or_404(request.form["RefugeeID"])
 
