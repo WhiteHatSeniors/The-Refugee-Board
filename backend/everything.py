@@ -308,20 +308,25 @@ def getAllRefugees():
     return jsonify(refugees_list)
 
 # Getting the camp based on the campID
-@app.route('/api/get/camp/campID/<campID>',methods=["GET"])
-def getCampByCampID(campID):
+@app.route('/api/get/camp',methods=["GET"])
+def getCampByCampID():
+    # Getting the campID from the request
+    args = request.args
+    campID = args.get("campID")
     # Getting the camp from the database
     camp = Camp.query.filter_by(CampID=campID).first()
+    # If camp doesn't exist
+    if camp is None:
+        return jsonify({"error": "Camp not found"}),404
     # Creating the camp details
     camp_details = {
         "CampID": camp.CampID,
-        "AdminName": camp.AdminName,
         "CampName": camp.CampName,
         "CampAddress": camp.CampAddress,
         "NumberOfRefugees": camp.NumberOfRefugees,
         "created_at": camp.created_at
     }
-    return jsonify(camp_details)
+    return jsonify(camp_details),200
 
 # Getting the camp based on the camp name
 @app.route('/api/get/camp/campName',methods=["POST"])
@@ -346,11 +351,12 @@ def addAllCamps():
     # return {"Not allowed":"Not allowed"}
     camps = request.get_json()
     for camp in camps:
-        new_camp = Camp(AdminName=camp["AdminName"],
+        new_camp = Camp(CampEmail=camp["CampEmail"],
                     CampName=camp["CampName"],
+                    password = camp["password"],
                     CampAddress=camp["CampAddress"],
-                    NumberOfRefugees=camp["NumberOfRefugees"])
-    
+                    NumberOfRefugees=camp["NumberOfRefugees"]
+                    )
         db.session.add(new_camp)
         db.session.commit()
     return jsonify(camps)
@@ -363,7 +369,7 @@ def addAllRefugees():
     refugees = request.get_json()
     print(refugees)
     for refugee in refugees:
-        new_refugee = Refugee(CampID= 1, #   or refugee_details["CampID"]
+        new_refugee = Refugee(CampID= refugee["CampID"],
                             Name = refugee["Name"],
                             Gender = refugee["Gender"],
                             Age = refugee["Age"],
