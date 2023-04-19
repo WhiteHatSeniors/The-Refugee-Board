@@ -22,6 +22,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # migrate = Migrate(app, db) WHYYY?
 
@@ -32,6 +33,7 @@ db = SQLAlchemy(app)
 class Camp(db.Model):
     CampID = db.Column(db.Integer, primary_key=True, unique=True)
     AdminName = db.Column(db.String(90))
+    password=db.Column(db.Text, nullable=False)
     CampName = db.Column(db.String(90))
     CampAddress = db.Column(db.String(90))
     NumberOfRefugees = db.Column(db.Integer)
