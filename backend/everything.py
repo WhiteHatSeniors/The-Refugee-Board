@@ -309,15 +309,24 @@ def getAllRefugees():
 
 # Getting the camp based on the campID
 @app.route('/api/get/camp',methods=["GET"])
-def getCampByCampID():
-    # Getting the campID from the request
+def getCamp():
+    '''NOTE: This method prioritizes the campID over the campName'''
+    # Getting the campID or campName from the request
     args = request.args
     campID = args.get("campID")
-    # Getting the camp from the database
-    camp = Camp.query.filter_by(CampID=campID).first()
+
+    if campID is None:
+        # Find camp by its name
+        campName = args.get("campName")
+        camp = Camp.query.filter_by(CampName=campName).first()
+    else:
+        # Find camp by its ID
+        camp = Camp.query.filter_by(CampID=campID).first()
+    
     # If camp doesn't exist
     if camp is None:
         return jsonify({"error": "Camp not found"}),404
+    
     # Creating the camp details
     camp_details = {
         "CampID": camp.CampID,
@@ -328,22 +337,6 @@ def getCampByCampID():
     }
     return jsonify(camp_details),200
 
-# Getting the camp based on the camp name
-@app.route('/api/get/camp/campName',methods=["POST"])
-def getCampByCampName():
-    # Getting the camp from the database
-    campName = request.get_json()
-    camp = Camp.query.filter_by(CampName=campName["CampName"]).first()
-    # Creating the camp details
-    camp_details = {
-        "CampID": camp.CampID,
-        "AdminName": camp.AdminName,
-        "CampName": camp.CampName,
-        "CampAddress": camp.CampAddress,
-        "NumberOfRefugees": camp.NumberOfRefugees,
-        "created_at": camp.created_at
-    }
-    return jsonify(camp_details)
     
 # Dummy method to add all the data to the camp table
 @app.route('/api/post/camp/all',methods=["POST"])
