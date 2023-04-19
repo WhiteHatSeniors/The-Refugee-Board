@@ -30,7 +30,7 @@ db = SQLAlchemy(app)
 
 # CampDetails
 class Camp(db.Model):
-    CampID = db.Column(db.Integer, primary_key=True)
+    CampID = db.Column(db.Integer, primary_key=True, unique=True)
     AdminName = db.Column(db.String(90))
     CampName = db.Column(db.String(90))
     CampAddress = db.Column(db.String(90))
@@ -45,7 +45,7 @@ class Camp(db.Model):
 # RefugeeBoard
 class Refugee(db.Model):
     # Photo?
-    RefugeeID = db.Column(db.Integer, primary_key=True)
+    RefugeeID = db.Column(db.Integer, primary_key=True, unique=True)
     CampID= db.Column(db.Integer, db.ForeignKey('camp.CampID'))
     Name = db.Column(db.String(140))
     Gender = db.Column(db.String(15))
