@@ -1,5 +1,8 @@
 import os
-from flask import Flask,jsonify,request
+import re
+import redis
+import dataclasses
+from flask import Flask,jsonify,request,session #client side session storing sessionID
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
@@ -9,10 +12,9 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from flask_migrate import Migrate 
 from datetime import datetime
-import dataclasses
 from dataclasses import dataclass
-import re
 from validate_email import validate_email  
+from flask_session import Session #server side session
 
 #Note: USE THIS ONLY WHEN return jsonify isnt working. Use this as custom encoder with json.dumps()
 # import json
@@ -29,20 +31,25 @@ from validate_email import validate_email
 
 load_dotenv()
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+# app.secret_key = os.environ.get('SECRET_KEY')
 CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 bcrypt = Bcrypt(app)
 
-
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 # "mysql://root:12345678@localhost/therefugeeboard"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SESSION_TYPE']="redis"
+app.config['SESSION_PERMANENT']=False
+app.config['SESSION_USE_SIGNER']=True
+app.config['SESSION_REDIS']=redis.from_url("redis://127.0.0.1:6379")
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+server_session=Session(app)
 
 # migrate = Migrate(app, db) WHYYY?
 
@@ -138,7 +145,7 @@ def createNewCamp():
     # No need of Custom JSON encoder for this
     return jsonify({
         "data": new_camp,
-    })
+    }),201
 
     # Alternative:
     # return json.dumps({
@@ -161,11 +168,15 @@ def login():
     if not bcrypt.check_password_hash(user.password,password):
         return jsonify({"error": "Invalid Email/Password"}),401
     
-    # Not being specific about errors to make it more secure
-    
-    return jsonify({
-        "data": user
-    })
+    # Not being specific about errors to make it more secure and prevent brute force attacks
+
+    # Yet to decide on whether to mplement this
+    # if session.get("user_id"):
+    #     return jsonify({"msg":"Login not possible as a user is already logged in"}),404
+
+    # print(user,user.CampID)
+    session["user_id"]=user.CampID
+    # print(session.get("user_id"))
     
     #Password checker:
     # Primary conditions for password validation:
@@ -175,24 +186,21 @@ def login():
     # At least 1 number or digit between [0-9].
     # At least 1 character from [ _ or @ or $ ]. 
 
-
-    
-    hashed_password=bcrypt.generate_password_hash(password)
-
-    # Adding it to the database
-    new_camp = Camp(CampEmail=camp_details["CampEmail"],
-        password=hashed_password,
-                    CampName=camp_details["CampName"],
-                    CampAddress=camp_details["CampAddress"],
-                    )
-
-    db.session.add(new_camp)
     db.session.commit()
 
     # No need of Custom JSON encoder for this
     return jsonify({
-        "data": new_camp,
+        "data": user,
     })
+
+
+# Log out functionality for camp admin
+@app.route("/logout", methods=["POST"])
+def logout_user():
+    if not session.get("user_id"):
+        return jsonify({"msg":"Not logged in, hence Log out not possible"}),404
+    session.pop("user_id")
+    return jsonify({"msg":"Succesfully logged out"}),200
 
 # Adding a refugee
 @app.route('/api/post/refugee',methods=["POST"])
