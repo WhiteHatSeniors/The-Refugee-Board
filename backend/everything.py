@@ -1,5 +1,6 @@
 import os
 from flask import Flask,jsonify,request
+from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
@@ -8,11 +9,26 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from flask_migrate import Migrate 
 from datetime import datetime
+import dataclasses
+from dataclasses import dataclass
+import json
+from json import JSONEncoder
+# https://linuxpip.org/object-of-type-is-not-json-serializable/
+
+class CustomEncoder(json.JSONEncoder):
+    def default(self, o):
+        if dataclasses.is_dataclass(o): # this serializes anything dataclass can handle  
+            return dataclasses.asdict(o)
+        if isinstance(o, datetime): # this adds support for datetime
+            return o.isoformat()
+        return super().default(o)
 
 load_dotenv()
 app = Flask(__name__)
 CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+bcrypt = Bcrypt(app)
 
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
@@ -30,54 +46,73 @@ migrate = Migrate(app, db)
 # Models
 
 # CampDetails
+@dataclass
 class Camp(db.Model):
-    CampID = db.Column(db.Integer, primary_key=True, unique=True)
-    CampEmail = db.Column(db.String(90))
-    password=db.Column(db.Text, nullable=False)
-    CampName = db.Column(db.String(90))
-    CampAddress = db.Column(db.String(90))
-    NumberOfRefugees = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    CampID: int = db.Column(db.Integer, primary_key=True, unique=True)
+    CampEmail: str = db.Column(db.String(90),nullable=False)
+    password: str=db.Column(db.Text, nullable=False)
+    CampName: str = db.Column(db.String(90),nullable=False)
+    CampAddress: str = db.Column(db.String(90),nullable=False)
+    NumberOfRefugees: int = db.Column(db.Integer, default=0)
+    created_at: datetime = db.Column(db.DateTime(timezone=True), server_default=func.now())
     
     refugees = relationship("Refugee",cascade="all, delete-orphan") # On Delete Cascade
 
     def __repr__(self):
-         return '<Camp Details {self.title}>'
+         return f'<Camp Details {self.CampName}>'
     
 # RefugeeBoard
+@dataclass
 class Refugee(db.Model):
     # Photo?
-    RefugeeID = db.Column(db.Integer, primary_key=True, unique=True)
-    CampID= db.Column(db.Integer, db.ForeignKey('camp.CampID'))
-    Name = db.Column(db.String(140))
-    Gender = db.Column(db.String(15))
-    Age = db.Column(db.Integer)
-    CountryOfOrigin = db.Column(db.String(50))
-    MessageDate = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    Message = db.Column(db.String(1000))
+    RefugeeID: int = db.Column(db.Integer, primary_key=True, unique=True)
+    CampID: str= db.Column(db.Integer, db.ForeignKey('camp.CampID'))
+    Name: str = db.Column(db.String(140))
+    Gender: str = db.Column(db.String(15))
+    Age: int = db.Column(db.Integer)
+    CountryOfOrigin: str = db.Column(db.String(50))
+    MessageDate: datetime = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    Message: str = db.Column(db.String(1000))
 
     
 
     def __repr__(self):
-        return '<Refugee Board {self.title}>'
+        return f'<Refugee Board {self.Name}>'
 
 with app.app_context():  
     db.create_all()
 
+# Sign Up
 # Creating a new camp
 @app.route('/api/post/camp',methods=["POST"])
 def createNewCamp():
     # Recieving details of the camp
     camp_details = request.get_json()
+    print(camp_details)
+    email=camp_details["CampEmail"]
+    password=camp_details["password"]
+    confirmPassword=camp_details["confirmPassword"]
+
+    user_exists=Camp.query.filter_by(CampEmail=email).first() is not None
+
+    if(user_exists):
+        return jsonify({"error": "User already exists"}),409
+    
+    hashed_password=bcrypt.generate_password_hash(password)
+
     # Adding it to the database
-    new_camp = Camp(AdminName=camp_details["AdminName"],
+    new_camp = Camp(CampEmail=camp_details["CampEmail"],
+        password=hashed_password,
                     CampName=camp_details["CampName"],
                     CampAddress=camp_details["CampAddress"],
-                    NumberOfRefugees=camp_details["NumberOfRefugees"])
-    
+                    )
+    print(new_camp)
     db.session.add(new_camp)
     db.session.commit()
-    return jsonify(camp_details)
+    return json.dumps({
+        "data": new_camp,
+        # "data": CustomEncoder().encode(new_camp)
+    },indent=4,cls=CustomEncoder),201
 
 # Adding a refugee
 @app.route('/api/post/refugee',methods=["POST"])
