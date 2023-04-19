@@ -98,6 +98,9 @@ def createNewCamp():
     if(user_exists):
         return jsonify({"error": "User already exists"}),409
     
+    if(password!=confirmPassword):
+        return jsonify({"error": "Passwords not matching"}),401
+    
     hashed_password=bcrypt.generate_password_hash(password)
 
     # Adding it to the database
@@ -109,9 +112,9 @@ def createNewCamp():
     print(new_camp)
     db.session.add(new_camp)
     db.session.commit()
+        # "data": CustomEncoder().encode(new_camp)
     return json.dumps({
         "data": new_camp,
-        # "data": CustomEncoder().encode(new_camp)
     },indent=4,cls=CustomEncoder),201
 
 # Adding a refugee
