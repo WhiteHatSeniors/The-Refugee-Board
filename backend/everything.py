@@ -93,7 +93,16 @@ class Refugee(db.Model):
 with app.app_context():  
     db.create_all()
 
-def validate_password(password):  
+def validate_password(password):
+
+    # Password checker
+    # Primary conditions for password validation:
+    # Minimum 8 characters.
+    # The alphabet must be between [a-z]
+    # At least one alphabet should be of Upper Case [A-Z]
+    # At least 1 number or digit between [0-9].
+    # At least 1 character from [ _ or @ or $ ]. 
+
     if len(password) < 8 or re.search("\s" , password):  
         return False  
     if not (re.search("[a-z]", password) and re.search("[A-Z]", password) and re.search("[0-9]", password) ):
@@ -111,34 +120,33 @@ def createNewCamp():
     password=camp_details["password"]
     confirmPassword=camp_details["confirmPassword"]
 
+    # Checking if the user exists
     user_exists=Camp.query.filter_by(CampEmail=email).first() is not None
-    if(user_exists):
+    if user_exists:
         return jsonify({"error": "User already exists"}),409
-    
-# 409- (Conflict) indicates that the request could not be processed because of conflict in the request
+        # 409- (Conflict) indicates that the request could not be processed because of conflict in the request
 
-    
+    # Validating user email
     is_valid = validate_email(email) 
-
     if not is_valid:  
-         return jsonify({"error": "Invalid Email ID"}),401
-    # 401 Unauthorized response status code indicates that the client request has not been completed because it lacks valid authentication credentials
+        return jsonify({"error": "Invalid Email ID"}),401
+        # 401 Unauthorized response status code indicates that the client request has not been completed because it lacks valid authentication credentials
 
-    if(password!=confirmPassword):
+    # Validating user password
+    if password != confirmPassword:
         return jsonify({"error": "Passwords not matching"}),401
-    
-    if not validate_password(password):
+    if not validate_password(password): # Peek the definition of this function for password constraints
         return jsonify({"error": "Invaid password pattern."}),401
 
+    # Hashing the password
     hashed_password=bcrypt.generate_password_hash(password)
 
     # Adding it to the database
     new_camp = Camp(CampEmail=camp_details["CampEmail"],
-        password=hashed_password,
+                    password=hashed_password,
                     CampName=camp_details["CampName"],
                     CampAddress=camp_details["CampAddress"],
-                    )
-
+                )
     db.session.add(new_camp)
     db.session.commit()
 
@@ -154,39 +162,35 @@ def createNewCamp():
 
     # return jsonify({"data":new_camp.__dict__})-> TypeError: Object of type InstanceState is not JSON serializable
 
+
 # Log In -> Camp Admin loggging in
 @app.route('/login',methods=["POST"])
 def login():
-    # Recieving details of the camp
+    # Recieving details of the camp logging in
     email=request.json["CampEmail"]
     password=request.json["password"]
-    user=Camp.query.filter_by(CampEmail=email).first()
 
+    # Checking if the user exists
+    user=Camp.query.filter_by(CampEmail=email).first()
     if user is None:
-        return jsonify({"error": "Invalid Email/Password"}),401
+        return jsonify({"error": "Invalid Email/Password"}),401 # Shouldn't this be "User doesn't exist"?
     
+    # Checking if the password matches
     if not bcrypt.check_password_hash(user.password,password):
         return jsonify({"error": "Invalid Email/Password"}),401
     
     # Not being specific about errors to make it more secure and prevent brute force attacks
 
-    # Yet to decide on whether to mplement this
+    # Yet to decide on whether to implement this
     # if session.get("user_id"):
     #     return jsonify({"msg":"Login not possible as a user is already logged in"}),404
 
     # print(user,user.CampID)
     session["user_id"]=user.CampID
     # print(session.get("user_id"))
-    
-    #Password checker:
-    # Primary conditions for password validation:
-    # Minimum 8 characters.
-    # The alphabet must be between [a-z]
-    # At least one alphabet should be of Upper Case [A-Z]
-    # At least 1 number or digit between [0-9].
-    # At least 1 character from [ _ or @ or $ ]. 
 
-    db.session.commit()
+    # db.session.commit()
+    # Please check, Hisham, I don't think the above statement is required. I've commented it out for now.
 
     # No need of Custom JSON encoder for this
     return jsonify({
@@ -194,11 +198,11 @@ def login():
     })
 
 
-# Log out functionality for camp admin
+# Log out functionality for the camp admin
 @app.route("/logout", methods=["POST"])
 def logout_user():
     if not session.get("user_id"):
-        return jsonify({"msg":"Not logged in, hence Log out not possible"}),404
+        return jsonify({"msg":"Not logged in, logout not possible"}),404
     session.pop("user_id")
     return jsonify({"msg":"Succesfully logged out"}),200
 
@@ -209,8 +213,8 @@ def createNewRefugee():
     # Recieving details of the refugee
     refugee_details = request.get_json()
     # Creating a new refugee object
-    print("Ref details: ",refugee_details)
-    new_refugee = Refugee(CampID= 1 
+    print("Ref details: ",refugee_details) # Debugging
+    new_refugee = Refugee(CampID= 1 # Shouldn't this be refugee_details["CampID"]?
                         #   or refugee_details["CampID"]
                           ,
                             Name = refugee_details["Name"],
@@ -230,6 +234,10 @@ def deleteRefugee(id):
     # Look up the refugeeID in the refugee table
     # refugee_to_delete = db.session.execute(db.select(Refugee).filter_by(Name=refugee_details["Name"])).scalar_one()
     ref = Refugee.query.get(id)
+    # If the refugee doesn't exist
+    if ref is None:
+        return jsonify({"error": "Refugee not found"}),404
+    
     db.session.delete(ref)
     deletedRefugee = {
         "RefugeeID": ref.RefugeeID,
@@ -251,12 +259,16 @@ def deleteCamp():
     camp_details = request.get_json()
     # Getting the camp object from the database
     camp_to_delete = Camp.query.filter_by(CampID=camp_details["CampID"]).first()
+    # If the camp doesn't exist
+    if camp_to_delete is None:
+        return jsonify({"error": "Camp not found"}),404
+    
     db.session.delete(camp_to_delete)
     db.session.commit()
     return jsonify(camp_details)
 
 # Getting all the camps
-@app.route('/api/get/all/camps',methods=["POST"])
+@app.route('/api/get/all/camps',methods=["GET"])
 def getAllCamps():
     # Getting all the camps from the database
     camps = Camp.query.all()
