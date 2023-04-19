@@ -11,17 +11,21 @@ from flask_migrate import Migrate
 from datetime import datetime
 import dataclasses
 from dataclasses import dataclass
-import json
-from json import JSONEncoder
+import re
+from validate_email import validate_email  
+
+#Note: USE THIS ONLY WHEN return jsonify isnt working. Use this as custom encoder with json.dumps()
+# import json
+# from json import JSONEncoder
 # https://linuxpip.org/object-of-type-is-not-json-serializable/
 
-class CustomEncoder(json.JSONEncoder):
-    def default(self, o):
-        if dataclasses.is_dataclass(o): # this serializes anything dataclass can handle  
-            return dataclasses.asdict(o)
-        if isinstance(o, datetime): # this adds support for datetime
-            return o.isoformat()
-        return super().default(o)
+# class CustomEncoder(json.JSONEncoder):
+#     def default(self, o):
+#         if dataclasses.is_dataclass(o): # this serializes anything dataclass can handle  
+#             return dataclasses.asdict(o)
+#         if isinstance(o, datetime): # this adds support for datetime
+#             return o.isoformat()
+#         return super().default(o)
 
 load_dotenv()
 app = Flask(__name__)
@@ -82,24 +86,96 @@ class Refugee(db.Model):
 with app.app_context():  
     db.create_all()
 
-# Sign Up
-# Creating a new camp
-@app.route('/api/post/camp',methods=["POST"])
+def validate_password(password):  
+    if len(password) < 8 or re.search("\s" , password):  
+        return False  
+    if not (re.search("[a-z]", password) and re.search("[A-Z]", password) and re.search("[0-9]", password) ):
+        return False  
+    return True  
+  
+
+# Creating a new camp -  Sign Up
+@app.route('/register',methods=["POST"])
 def createNewCamp():
     # Recieving details of the camp
     camp_details = request.get_json()
-    print(camp_details)
+
     email=camp_details["CampEmail"]
     password=camp_details["password"]
     confirmPassword=camp_details["confirmPassword"]
 
     user_exists=Camp.query.filter_by(CampEmail=email).first() is not None
-
     if(user_exists):
         return jsonify({"error": "User already exists"}),409
     
+# 409- (Conflict) indicates that the request could not be processed because of conflict in the request
+
+    
+    is_valid = validate_email(email) 
+
+    if not is_valid:  
+         return jsonify({"error": "Invalid Email ID"}),401
+    # 401 Unauthorized response status code indicates that the client request has not been completed because it lacks valid authentication credentials
+
     if(password!=confirmPassword):
         return jsonify({"error": "Passwords not matching"}),401
+    
+    if not validate_password(password):
+        return jsonify({"error": "Invaid password pattern."}),401
+
+    hashed_password=bcrypt.generate_password_hash(password)
+
+    # Adding it to the database
+    new_camp = Camp(CampEmail=camp_details["CampEmail"],
+        password=hashed_password,
+                    CampName=camp_details["CampName"],
+                    CampAddress=camp_details["CampAddress"],
+                    )
+
+    db.session.add(new_camp)
+    db.session.commit()
+
+    # No need of Custom JSON encoder for this
+    return jsonify({
+        "data": new_camp,
+    })
+
+    # Alternative:
+    # return json.dumps({
+    #     "data": new_camp,
+    # },indent=4,cls=CustomEncoder),201
+
+    # return jsonify({"data":new_camp.__dict__})-> TypeError: Object of type InstanceState is not JSON serializable
+
+# Log In -> Camp Admin loggging in
+@app.route('/login',methods=["POST"])
+def login():
+    # Recieving details of the camp
+    email=request.json["CampEmail"]
+    password=request.json["password"]
+    user=Camp.query.filter_by(CampEmail=email).first()
+
+    if user is None:
+        return jsonify({"error": "Invalid Email/Password"}),401
+    
+    if not bcrypt.check_password_hash(user.password,password):
+        return jsonify({"error": "Invalid Email/Password"}),401
+    
+    # Not being specific about errors to make it more secure
+    
+    return jsonify({
+        "data": user
+    })
+    
+    #Password checker:
+    # Primary conditions for password validation:
+    # Minimum 8 characters.
+    # The alphabet must be between [a-z]
+    # At least one alphabet should be of Upper Case [A-Z]
+    # At least 1 number or digit between [0-9].
+    # At least 1 character from [ _ or @ or $ ]. 
+
+
     
     hashed_password=bcrypt.generate_password_hash(password)
 
@@ -109,13 +185,14 @@ def createNewCamp():
                     CampName=camp_details["CampName"],
                     CampAddress=camp_details["CampAddress"],
                     )
-    print(new_camp)
+
     db.session.add(new_camp)
     db.session.commit()
-        # "data": CustomEncoder().encode(new_camp)
-    return json.dumps({
+
+    # No need of Custom JSON encoder for this
+    return jsonify({
         "data": new_camp,
-    },indent=4,cls=CustomEncoder),201
+    })
 
 # Adding a refugee
 @app.route('/api/post/refugee',methods=["POST"])
