@@ -244,8 +244,8 @@ def deleteRefugee(id):
     db.session.commit()
     return jsonify(deletedRefugee)
 
-# Deleting a camp
-@app.route('/api/delete/camp',methods=["POST"])
+# Deleting a camp -> Deleting an account
+@app.route('/api/delete/camp',methods=["DELETE"])
 def deleteCamp():
     # Recieving details of the camp
     camp_details = request.get_json()
