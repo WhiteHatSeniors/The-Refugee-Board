@@ -32,11 +32,11 @@ migrate = Migrate(app, db)
 # CampDetails
 class Camp(db.Model):
     CampID = db.Column(db.Integer, primary_key=True, unique=True)
-    AdminName = db.Column(db.String(90))
+    CampEmail = db.Column(db.String(90))
     password=db.Column(db.Text, nullable=False)
     CampName = db.Column(db.String(90))
     CampAddress = db.Column(db.String(90))
-    NumberOfRefugees = db.Column(db.Integer)
+    NumberOfRefugees = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     
     refugees = relationship("Refugee",cascade="all, delete-orphan") # On Delete Cascade
