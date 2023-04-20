@@ -1,24 +1,57 @@
 import React, { useState, useEffect } from "react";
 // import useLogin from "../Hooks/useLogin";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { signIn, register } from "../utils/auth";
+import { useQuery } from "@tanstack/react-query"
+import { useLogin } from "../Hooks/useLogin";
+import { useQueryClient, useMutation } from "@tanstack/react-query"
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [passwordShown, setPasswordShown] = useState(false);
+    // const signInMutation = useLogin()
     const [pw, setPw] = useState("");
-    // const { login, error, isLoading, isSucc } = useLogin();
-    const navigate = useNavigate();
+    const queryClient = useQueryClient()
+    const navigate = useNavigate()
+    const [info, setInfo, user, setUser] = useOutletContext()
+    const location = useLocation();
+
+    useEffect(() => {
+        console.log(user)
+        if (location.pathname == '/login') {
+            console.log('YOOOOOOOOOOOOO')
+            console.log(user, JSON.parse(localStorage.getItem("id")))
+            if (user?.CampId || JSON.parse(localStorage.getItem("id"))) navigate('/admin')
+        }
+    }, [user])
+
+    const { mutate: signInMutation, data: userData } = useMutation({
+        mutationFn: (data) => signIn(data.email, data.password),
+        onSuccess: (data) => {
+            console.log(data)
+            if (data.status <= 299) {
+                // setUser(data.data)
+                console.log(data.data)
+                setUser(data.data)
+                localStorage.setItem("id", JSON.stringify(data.data.CampID))
+                queryClient.setQueryData(['User'], data)
+                // localStorage.setItem("id", JSON.stringify(data.data.CampID))
+            }
+        },
+        onError: (error) => {
+            console.log(error)
+        }
+    });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // await login(email, pw);
-        if (isSucc) {
-            setTimeout(() => {
-                navigate("/attendance");
-            }, 1500);
-        }
-        // console.log(error);
+        const data = { email, password: pw }
+        await signInMutation(data)
+        navigate('/admin')
+        // setTimeout(() => {
+        //     navigate("/attendance");
+        // }, 1500);
     };
 
     const togglePassword = () => {
@@ -68,11 +101,11 @@ export default function Login() {
             )}
             <button
                 // disabled={isLoading}
-                onClick={(e) => {
-                    setTimeout(() => {
-                        navigate('/admin')
-                    }, 1000)
-                }}
+                // onClick={(e) => {
+                //     setTimeout(() => {
+                //         navigate('/admin')
+                //     }, 1000)
+                // }}
                 className="inline-block px-7 py-3 w-[75%] bg-blue-600 text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out mb-8"
                 type="submit"
             >

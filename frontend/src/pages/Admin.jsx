@@ -2,14 +2,25 @@ import { useEffect, useState } from 'react'
 import { FcSearch } from 'react-icons/fc';
 // import Data from "../mock-data.json"
 import DataTable from '../components/DataTable';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
+import { useQuery } from "@tanstack/react-query"
+import AxFetch from '../utils/axios';
 
 function Admin() {
     const [isActive, setActive] = useState(false)
     const [query, setQuery] = useState("")
-    const [info, setInfo] = useOutletContext()
+    const [info, setInfo, user, setUser] = useOutletContext()
+    const location = useLocation();
 
     const navigate = useNavigate()
+
+    useEffect(() => {
+        console.log(user, location.pathname)
+        if (location.pathname == '/admin') {
+            console.log('HAHAHHAHAHAHAH')
+            if (!(user?.CampId) && !(JSON.parse(localStorage.getItem("id")))) navigate('/')
+        }
+    }, [user])
 
     // useEffect(() => {
     //     fetch('http://127.0.0.1:5000/api/get/all/refugees')
@@ -22,13 +33,18 @@ function Admin() {
 
     // }, [])
 
+    // const {data, isLoading, error} = useQuery(
+    //     ['camp-refugees'],
+    //     async ()=> await AxFetch.get("")
+    //   )
+
     const editEntry = (id) => {
         // fetch('http://127.0.0.1:5000/api/update/refugee')
         console.log('Editing ' + id)
     }
 
     const deleteEntry = async (id) => {
-        fetch(`http://127.0.0.1:5000/api/delete/refugee/${id}`, {
+        fetch(`/api/delete/refugee/${id}`, {
             method: "DELETE",
             headers: {
                 "Content-type": "application/json",
