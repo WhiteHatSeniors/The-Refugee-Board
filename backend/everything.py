@@ -211,10 +211,15 @@ def logout_user():
 @cross_origin()
 def createNewRefugee():
     # Recieving details of the refugee
+    if not session.get("user_id"):
+        return jsonify({"msg: Not logged in"}), 403
+    
+# The HTTP 403 Forbidden response status code indicates that the server understands the request but refuses to authorize it
+
     refugee_details = request.get_json()
     # Creating a new refugee object
-    print("Ref details: ",refugee_details) # Debugging
-    new_refugee = Refugee(CampID= 1 # Shouldn't this be refugee_details["CampID"]?
+    print("Ref details: ",refugee_details)
+    new_refugee = Refugee(CampID= session.get("user_id")
                         #   or refugee_details["CampID"]
                           ,
                             Name = refugee_details["Name"],
@@ -233,6 +238,9 @@ def deleteRefugee(id):
     # Getting the refugee object from the database
     # Look up the refugeeID in the refugee table
     # refugee_to_delete = db.session.execute(db.select(Refugee).filter_by(Name=refugee_details["Name"])).scalar_one()
+    if not session.get("user_id"):
+        return jsonify({"msg: Not logged in"}), 403
+    
     ref = Refugee.query.get(id)
     # If the refugee doesn't exist
     if ref is None:
@@ -250,7 +258,11 @@ def deleteRefugee(id):
         "MessageDate": ref.MessageDate
     }
     db.session.commit()
-    return jsonify(deletedRefugee)
+    return jsonify({
+        "data": ref
+    }),204
+
+# --------------------------------------------------------------------- #
 
 # Deleting a camp -> Deleting an account
 @app.route('/api/delete/camp',methods=["DELETE"])
