@@ -48,6 +48,7 @@ export default function DataTable({ data, query, deleteEntry, editEntry }) {
 
     const indexOfLastRecord = currentPage * recordsPerPage;
     const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+    console.log(data)
     const currentRecords = !data ? "" : data.slice(indexOfFirstRecord, indexOfLastRecord);
 
 

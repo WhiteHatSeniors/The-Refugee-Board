@@ -31,28 +31,30 @@ from flask_session import Session #server side session
 
 load_dotenv()
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-# app.secret_key = os.environ.get('SECRET_KEY')
-CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
-
-bcrypt = Bcrypt(app)
-
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
-# "mysql://root:12345678@localhost/therefugeeboard"
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SESSION_TYPE']="redis"
 app.config['SESSION_PERMANENT']=False
-app.config['SESSION_USE_SIGNER']=True
 app.config['SESSION_REDIS']=redis.from_url("redis://127.0.0.1:6379")
+app.config['SESSION_USE_SIGNER']=True
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
 
+bcrypt = Bcrypt(app)
+# app.secret_key = os.environ.get('SECRET_KEY')
+CORS(app, supports_credentials=True)
+# app.config['CORS_HEADERS'] = 'Content-Type'
+
+
+server_session=Session(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-server_session=Session(app)
 
 # migrate = Migrate(app, db) WHYYY?
-
+with app.app_context():  
+    db.create_all()
 
 # Models
 
@@ -90,8 +92,6 @@ class Refugee(db.Model):
     def __repr__(self):
         return f'<Refugee Board {self.Name}>'
 
-with app.app_context():  
-    db.create_all()
 
 def validate_password(password):
 
@@ -164,10 +164,11 @@ def createNewCamp():
 
 
 # Log In -> Camp Admin loggging in
-@app.route('/login',methods=["POST"])
+@app.route('/api/login',methods=["POST"])
 def login():
     # Recieving details of the camp logging in
     email=request.json["CampEmail"]
+    print(request.json, "Hi")
     password=request.json["password"]
 
     # Checking if the user exists
@@ -178,6 +179,7 @@ def login():
     # Checking if the password matches
     if not bcrypt.check_password_hash(user.password,password):
         return jsonify({"error": "Invalid Email/Password"}),401
+        return jsonify({"error": "Invalid Email/Password"})
     
     # Not being specific about errors to make it more secure and prevent brute force attacks
 
@@ -198,21 +200,21 @@ def login():
     })
 
 
-# Log out functionality for the camp admin
-@app.route("/logout", methods=["POST"])
+# Log out functionality for camp admin
+@app.route("/api/logout", methods=["POST"])
 def logout_user():
     if not session.get("user_id"):
-        return jsonify({"msg":"Not logged in, logout not possible"}),404
-    session.pop("user_id")
-    return jsonify({"msg":"Succesfully logged out"}),200
+        return jsonify({"error":"Not logged in, hence Log out not possible"}),404
+    session.pop("user_id",None)
+    return jsonify({"data":"Succesfully logged out"}),200
 
 # Adding a refugee
 @app.route('/api/post/refugee',methods=["POST"])
-@cross_origin()
 def createNewRefugee():
     # Recieving details of the refugee
+    print(session, session.get("user_id"), "hfgdfgd")
     if not session.get("user_id"):
-        return jsonify({"msg: Not logged in"}), 403
+        return jsonify({"error": "Not logged in"}), 403
     
     # The HTTP 403 Forbidden response status code indicates that the server understands the request but refuses to authorize it
 
@@ -229,7 +231,7 @@ def createNewRefugee():
                             Message = refugee_details["Message"])
     db.session.add(new_refugee)
     db.session.commit()
-    return jsonify(refugee_details)
+    return jsonify({"data": new_refugee}),201
 
 # Deleting a refugee
 @app.route('/api/delete/refugee/<id>',methods=["DELETE"])
@@ -239,7 +241,7 @@ def deleteRefugee(id):
     # Look up the refugeeID in the refugee table
     # refugee_to_delete = db.session.execute(db.select(Refugee).filter_by(Name=refugee_details["Name"])).scalar_one()
     if not session.get("user_id"):
-        return jsonify({"msg: Not logged in"}), 403
+        return jsonify({"error": "Not logged in"}), 403
     
     ref = Refugee.query.get(id)
     # If the refugee doesn't exist
@@ -373,7 +375,6 @@ def addAllCamps():
 
 # Dummy method to add all the data to the refugee table
 @app.route('/api/post/refugee/all',methods=["POST"])
-@cross_origin()
 def addAllRefugees():
     # return {"Not allowed":"Not allowed"}
     refugees = request.get_json()

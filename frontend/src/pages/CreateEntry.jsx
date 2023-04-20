@@ -16,7 +16,7 @@ function CreateEntry() {
                 Age: age, Name: name, Gender: gender, CountryOfOrigin: origin, Message: message
             }
             console.log(info)
-            const res = await fetch("http://127.0.0.1:5000/api/post/refugee", {
+            const res = await fetch("/api/post/refugee", {
                 method: "POST",
                 headers: {
                     "Content-type": "application/json",
