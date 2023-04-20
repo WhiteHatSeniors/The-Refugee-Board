@@ -25,7 +25,7 @@ function Root() {
         const id = localStorage.getItem("id");
         console.log(id)
         if (!id) setUser(null);
-        else fetch('api/get/camp/campID/' + id)
+        else fetch('api/get/camp?campID=' + id)
             .then(response => response.json())
             .then(response => {
                 console.log(response)

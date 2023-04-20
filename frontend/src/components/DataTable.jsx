@@ -42,7 +42,7 @@ export default function DataTable({ data, query, deleteEntry, editEntry }) {
 
     // User is currently on this page
     const [currentPage, setCurrentPage] = useState(1);
-    const recordsPerPage = 7;
+    const recordsPerPage = 10;
     const nPages = !data ? 0 : Math.ceil(data.length / recordsPerPage);
     console.log(data)
 
