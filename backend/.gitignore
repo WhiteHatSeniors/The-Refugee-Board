@@ -2,3 +2,5 @@ env/
 venv/
 .env
 passwords-test.txt
+.DS_Store
+__pycache__/
