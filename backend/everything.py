@@ -111,7 +111,7 @@ def validate_password(password):
   
 
 # Creating a new camp -  Sign Up
-@app.route('/register',methods=["POST"])
+@app.route('/api/register',methods=["POST"])
 def createNewCamp():
     # Recieving details of the camp
     camp_details = request.get_json()
@@ -214,7 +214,7 @@ def createNewRefugee():
     if not session.get("user_id"):
         return jsonify({"msg: Not logged in"}), 403
     
-# The HTTP 403 Forbidden response status code indicates that the server understands the request but refuses to authorize it
+    # The HTTP 403 Forbidden response status code indicates that the server understands the request but refuses to authorize it
 
     refugee_details = request.get_json()
     # Creating a new refugee object
@@ -319,6 +319,9 @@ def getAllRefugees():
         refugees_list.append(refugee_details)
     return jsonify(refugees_list)
 
+# Getting refugees based on the CountryOfOrigin and CampID
+@app.route('/api/get/refugees',methods=["GET"])
+
 # Getting the camp based on the campID or campName
 @app.route('/api/get/camp',methods=["GET"])
 def getCamp():
@@ -393,7 +396,7 @@ def updateRefugee():
     # Recieving details of the refugee
     refugee = Refugee.query.get_or_404(request.form["RefugeeID"])
 
-    if request.method == 'POST':
+    if request.method == 'PATCH':
         refugee.Name = request.form['Name']
         refugee.Gender = request.form['Gender']
         refugee.CountryOfOrigin = request.form['CountryOfOrigin']
