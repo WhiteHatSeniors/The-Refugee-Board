@@ -44,17 +44,25 @@ function Admin() {
     }
 
     const deleteEntry = async (id) => {
-        fetch(`/api/delete/refugee/${id}`, {
-            method: "DELETE",
-            headers: {
-                "Content-type": "application/json",
-            }
-        })
-            .then(response => response.json())
-            .then(response => {
-                setInfo((prev) => prev.filter(ele => ele.RefugeeID != id))
-            })
-            .catch(error => console.log(error))
+
+        try {
+            await AxFetch.delete(`/api/delete/refugee/${id}`)
+            setInfo((prev) => prev.filter(ele => ele.RefugeeID != id))
+        } catch (err) {
+            console.log(err)
+        }
+
+
+        // fetch(`/api/delete/refugee/${id}`, {
+        //     method: "DELETE",
+        //     credentials: "include"
+
+        // })
+        //     .then(response => response.json())
+        //     .then(response => {
+        //         setInfo((prev) => prev.filter(ele => ele.RefugeeID != id))
+        //     })
+        //     .catch(error => console.log(error))
     }
 
 
