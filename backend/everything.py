@@ -200,13 +200,13 @@ def login():
     })
 
 
-# Log out functionality for camp admin
-@app.route("/api/logout", methods=["POST"])
+# Log out functionality for the camp admin
+@app.route("/logout", methods=["POST"])
 def logout_user():
     if not session.get("user_id"):
-        return jsonify({"error":"Not logged in, hence Log out not possible"}),404
-    session.pop("user_id",None)
-    return jsonify({"data":"Succesfully logged out"}),200
+        return jsonify({"msg":"Not logged in, logout not possible"}),404
+    session.pop("user_id")
+    return jsonify({"msg":"Succesfully logged out"}),200
 
 # Adding a refugee
 @app.route('/api/post/refugee',methods=["POST"])

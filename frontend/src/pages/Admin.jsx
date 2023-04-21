@@ -75,7 +75,7 @@ function Admin() {
             <div className='text-center'>
                 <div className='flex-row'>
                     <button className='bg-green-500 p-1 rounded-xl m-4' onClick={(e) => navigate('/create-entry')}>Create Entry</button>
-                    <input placeholder="Enter name" onChange={event => setQuery(event.target.value)} onClick={event => setActive(prev => !prev)} className={isActive ? 'border-black border-2 px-7 py-3 w-[80%]' : 'border-black border-y px-7 py-3 w-[60%]'} />
+                    <input placeholder="Enter name" onChange={event => setQuery(event.target.value)} onClick={event => setActive(prev => !prev)} className={/*isActive ? 'border-black border-2 px-7 py-3 w-[80%]' :*/ 'border-black border-y px-7 py-3 w-[60%]'} />
                     <FcSearch className='text-center inline-block text-4xl ' />
                 </div>
                 {/* {JSON.stringify(Data)} */}
