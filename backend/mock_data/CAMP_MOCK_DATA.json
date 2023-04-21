@@ -1,16 +1,122 @@
-[{"CampID":1,"CampEmail":"gkiebes0@linkedin.com","password":"3l7fJzTLEt","CampName":"Georgiana","NumberOfRefugees":5,"CampAddress":"12th Floor"},
-{"CampID":2,"CampEmail":"rstert1@ow.ly","password":"Bg573M","CampName":"Rufus","NumberOfRefugees":87,"CampAddress":"Room 256"},
-{"CampID":3,"CampEmail":"jobruen2@over-blog.com","password":"QHhJ46","CampName":"Jacquetta","NumberOfRefugees":94,"CampAddress":"Suite 47"},
-{"CampID":4,"CampEmail":"ebullingham3@squarespace.com","password":"mzVGewupK6","CampName":"Evangeline","NumberOfRefugees":80,"CampAddress":"Apt 1776"},
-{"CampID":5,"CampEmail":"jdewan4@merriam-webster.com","password":"PcVicnl6S","CampName":"Jeth","NumberOfRefugees":76,"CampAddress":"Apt 1838"},
-{"CampID":6,"CampEmail":"nkliche5@sfgate.com","password":"7PTiFLZsx","CampName":"Nita","NumberOfRefugees":45,"CampAddress":"6th Floor"},
-{"CampID":7,"CampEmail":"btrehearne6@sohu.com","password":"e8J77NRzIzi","CampName":"Bianka","NumberOfRefugees":28,"CampAddress":"Suite 80"},
-{"CampID":8,"CampEmail":"nastupenas7@redcross.org","password":"EekYQ8tP","CampName":"Noam","NumberOfRefugees":27,"CampAddress":"6th Floor"},
-{"CampID":9,"CampEmail":"msolomonides8@marketwatch.com","password":"KVUiY6Hs3S7","CampName":"Margo","NumberOfRefugees":65,"CampAddress":"PO Box 54502"},
-{"CampID":10,"CampEmail":"bbenedyktowicz9@independent.co.uk","password":"FRcOB6","CampName":"Bessy","NumberOfRefugees":28,"CampAddress":"PO Box 18345"},
-{"CampID":11,"CampEmail":"bsmethursta@youku.com","password":"FJnSYCVL","CampName":"Barclay","NumberOfRefugees":23,"CampAddress":"Apt 1734"},
-{"CampID":12,"CampEmail":"cfollosb@census.gov","password":"bYPSyJm0Q","CampName":"Carlin","NumberOfRefugees":17,"CampAddress":"PO Box 18417"},
-{"CampID":13,"CampEmail":"dambergerc@hatena.ne.jp","password":"80TnDdKj3","CampName":"Davy","NumberOfRefugees":54,"CampAddress":"Room 982"},
-{"CampID":14,"CampEmail":"kdarringtond@photobucket.com","password":"Nnk4z9s","CampName":"Karmen","NumberOfRefugees":57,"CampAddress":"PO Box 76558"},
-{"CampID":15,"CampEmail":"twhisselle@timesonline.co.uk","password":"BlPdZ0AQGH","CampName":"Tansy","NumberOfRefugees":14,"CampAddress":"12th Floor"}
+[
+    {
+        "CampID": 1,
+        "CampEmail": "gkiebes0@linkedin.com",
+        "password": "3l7fJzTLEt",
+        "CampName": "Georgiana",
+        "NumberOfRefugees": 5,
+        "CampAddress": "12th Floor"
+    },
+    {
+        "CampID": 2,
+        "CampEmail": "rstert1@ow.ly",
+        "password": "Bg573M",
+        "CampName": "Rufus",
+        "NumberOfRefugees": 87,
+        "CampAddress": "Room 256"
+    },
+    {
+        "CampID": 3,
+        "CampEmail": "jobruen2@over-blog.com",
+        "password": "QHhJ46",
+        "CampName": "Jacquetta",
+        "NumberOfRefugees": 94,
+        "CampAddress": "Suite 47"
+    },
+    {
+        "CampID": 4,
+        "CampEmail": "ebullingham3@squarespace.com",
+        "password": "mzVGewupK6",
+        "CampName": "Evangeline",
+        "NumberOfRefugees": 80,
+        "CampAddress": "Apt 1776"
+    },
+    {
+        "CampID": 5,
+        "CampEmail": "jdewan4@merriam-webster.com",
+        "password": "PcVicnl6S",
+        "CampName": "Jeth",
+        "NumberOfRefugees": 76,
+        "CampAddress": "Apt 1838"
+    },
+    {
+        "CampID": 6,
+        "CampEmail": "nkliche5@sfgate.com",
+        "password": "7PTiFLZsx",
+        "CampName": "Nita",
+        "NumberOfRefugees": 45,
+        "CampAddress": "6th Floor"
+    },
+    {
+        "CampID": 7,
+        "CampEmail": "btrehearne6@sohu.com",
+        "password": "e8J77NRzIzi",
+        "CampName": "Bianka",
+        "NumberOfRefugees": 28,
+        "CampAddress": "Suite 80"
+    },
+    {
+        "CampID": 8,
+        "CampEmail": "nastupenas7@redcross.org",
+        "password": "EekYQ8tP",
+        "CampName": "Noam",
+        "NumberOfRefugees": 27,
+        "CampAddress": "6th Floor"
+    },
+    {
+        "CampID": 9,
+        "CampEmail": "msolomonides8@marketwatch.com",
+        "password": "KVUiY6Hs3S7",
+        "CampName": "Margo",
+        "NumberOfRefugees": 65,
+        "CampAddress": "PO Box 54502"
+    },
+    {
+        "CampID": 10,
+        "CampEmail": "bbenedyktowicz9@independent.co.uk",
+        "password": "FRcOB6",
+        "CampName": "Bessy",
+        "NumberOfRefugees": 28,
+        "CampAddress": "PO Box 18345"
+    },
+    {
+        "CampID": 11,
+        "CampEmail": "bsmethursta@youku.com",
+        "password": "FJnSYCVL",
+        "CampName": "Barclay",
+        "NumberOfRefugees": 23,
+        "CampAddress": "Apt 1734"
+    },
+    {
+        "CampID": 12,
+        "CampEmail": "cfollosb@census.gov",
+        "password": "bYPSyJm0Q",
+        "CampName": "Carlin",
+        "NumberOfRefugees": 17,
+        "CampAddress": "PO Box 18417"
+    },
+    {
+        "CampID": 13,
+        "CampEmail": "dambergerc@hatena.ne.jp",
+        "password": "80TnDdKj3",
+        "CampName": "Davy",
+        "NumberOfRefugees": 54,
+        "CampAddress": "Room 982"
+    },
+    {
+        "CampID": 14,
+        "CampEmail": "kdarringtond@photobucket.com",
+        "password": "Nnk4z9s",
+        "CampName": "Karmen",
+        "NumberOfRefugees": 57,
+        "CampAddress": "PO Box 76558"
+    },
+    {
+        "CampID": 15,
+        "CampEmail": "twhisselle@timesonline.co.uk",
+        "password": "BlPdZ0AQGH",
+        "CampName": "Tansy",
+        "NumberOfRefugees": 14,
+        "CampAddress": "12th Floor"
+    }
 ]

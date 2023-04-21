@@ -53,8 +53,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # migrate = Migrate(app, db) WHYYY?
-with app.app_context():  
-    db.create_all()
+
 
 # Models
 
@@ -92,6 +91,8 @@ class Refugee(db.Model):
     def __repr__(self):
         return f'<Refugee Board {self.Name}>'
 
+with app.app_context():  
+    db.create_all()
 
 def validate_password(password):
 
@@ -240,6 +241,8 @@ def deleteRefugee(id):
     # Getting the refugee object from the database
     # Look up the refugeeID in the refugee table
     # refugee_to_delete = db.session.execute(db.select(Refugee).filter_by(Name=refugee_details["Name"])).scalar_one()
+    
+    # You need to be logged in to delete a refugee
     if not session.get("user_id"):
         return jsonify({"error": "Not logged in"}), 403
     
@@ -264,7 +267,6 @@ def deleteRefugee(id):
         "data": ref
     }),204
 
-# --------------------------------------------------------------------- #
 
 # Deleting a camp -> Deleting an account
 @app.route('/api/delete/camp',methods=["DELETE"])
@@ -323,6 +325,43 @@ def getAllRefugees():
 
 # Getting refugees based on the CountryOfOrigin and CampID
 @app.route('/api/get/refugees',methods=["GET"])
+def getRefugees():
+    args = request.args
+    country = args.get("CountryOfOrigin")
+    campID = args.get("CampID")
+
+    if country is None and campID is None:
+        return jsonify({"error": "No parameters were given"}),404
+    elif country is None:
+        # Find refugees from a single camp
+        refugees = Refugee.query.filter_by(CampID=campID).order_by(Refugee.MessageDate.desc()).all()
+    elif campID is None:
+        # Find refugees from a single country
+        refugees = Refugee.query.filter_by(CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
+    else:
+        # Find refugees from a single camp and country
+        refugees = Refugee.query.filter_by(CampID=campID,CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
+    
+    if len(refugees) == 0:
+        return jsonify({"error": "No refugees found"}),404
+    
+    # Creating a list of all the refugees
+    refugees_list = []
+    for refugee in refugees:
+        refugee_details = {
+            "RefugeeID": refugee.RefugeeID,
+            "CampID": refugee.CampID,
+            "Name": refugee.Name,
+            "Gender": refugee.Gender,
+            "Age": refugee.Age,
+            "CountryOfOrigin": refugee.CountryOfOrigin,
+            "Message": refugee.Message,
+            "MessageDate": refugee.MessageDate
+        }
+        refugees_list.append(refugee_details)
+    
+    return jsonify(refugees_list),200
+
 
 # Getting the camp based on the campID or campName
 @app.route('/api/get/camp',methods=["GET"])
