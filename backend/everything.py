@@ -7,7 +7,7 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import select
+from sqlalchemy import and_
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from flask_migrate import Migrate 
@@ -345,18 +345,33 @@ def getRefugees():
     args = request.args
     country = args.get("CountryOfOrigin")
     campID = args.get("CampID")
+    name = args.get("Name")
 
-    if country is None and campID is None:
-        return jsonify({"error": "No parameters were given"}),400
-    elif country is None:
-        # Find refugees from a single camp
-        refugees = Refugee.query.filter_by(CampID=campID).order_by(Refugee.MessageDate.desc()).all()
-    elif campID is None:
-        # Find refugees from a single country
-        refugees = Refugee.query.filter_by(CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
+    if name is None:
+        if country is None and campID is None:
+            return jsonify({"error": "No parameters were given"}),400
+        elif country is None:
+            # Find refugees from a single camp
+            refugees = Refugee.query.filter_by(CampID=campID).order_by(Refugee.MessageDate.desc()).all()
+        elif campID is None:
+            # Find refugees from a single country
+            refugees = Refugee.query.filter_by(CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
+        else:
+            # Find refugees from a single camp and country
+            refugees = Refugee.query.filter_by(CampID=campID,CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
     else:
-        # Find refugees from a single camp and country
-        refugees = Refugee.query.filter_by(CampID=campID,CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
+        if country is None and campID is None:
+            # Find refugees LIKE name
+            refugees = Refugee.query.filter(Refugee.Name.like(f"%{name}%")).order_by(Refugee.MessageDate.desc()).all()
+        elif country is None:
+            # Find refugees with LIKE name from a single camp
+            refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.CampID==campID)).order_by(Refugee.MessageDate.desc()).all()
+        elif campID is None:
+            # Find refugees with LIKE name from a single country
+            refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.CountryOfOrigin==country)).order_by(Refugee.MessageDate.desc()).all()
+        else:
+            # Find refugees with a LIKE name from a single camp and country
+            refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.CampID==campID,Refugee.CountryOfOrigin==country)).order_by(Refugee.MessageDate.desc()).all()
     
     # Checking if no refugees were found
     if len(refugees) == 0:

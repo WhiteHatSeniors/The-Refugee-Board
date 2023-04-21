@@ -53,9 +53,9 @@
 
 3. Getting refugees based on CampID, Name or CountryOfOrigin:
     - *GET* ```/api/get/refugees```
-    - Takes atleast one of two query paremeters:
+    - Takes atleast one of three query paremeters:
         1. CampID (int) - Returns all refugees associated with the given CampID.
-        2. Name (string) - Returns all refugees whose name contains the given string. (NOT IMPLEMENTED YET)
+        2. Name (string) - Returns all refugees whose name contains the given string. (No quotes)
         3. CountryOfOrigin (string) - Returns all refugees belonging to the given country.
     - If no parameters were given, a 400 is thrown.
     - If no refugees were found, a 404 is thrown.
