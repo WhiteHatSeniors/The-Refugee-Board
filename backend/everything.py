@@ -172,28 +172,24 @@ def login():
     print(request.json, "Hi")
     password=request.json["password"]
 
+    # NOTE: Not being specific about errors to make it more secure and prevent brute force attacks
+
     # Checking if the user exists
     user=Camp.query.filter_by(CampEmail=email).first()
     if user is None:
-        return jsonify({"error": "Invalid Email/Password"}),401 # Shouldn't this be "User doesn't exist"?
+        return jsonify({"error": "Invalid Email/Password"}),401 
     
     # Checking if the password matches
     if not bcrypt.check_password_hash(user.password,password):
         return jsonify({"error": "Invalid Email/Password"}),401
-        return jsonify({"error": "Invalid Email/Password"})
     
-    # Not being specific about errors to make it more secure and prevent brute force attacks
-
+    
     # Yet to decide on whether to implement this
     # if session.get("user_id"):
     #     return jsonify({"msg":"Login not possible as a user is already logged in"}),404
 
     # print(user,user.CampID)
     session["user_id"]=user.CampID
-    # print(session.get("user_id"))
-
-    # db.session.commit()
-    # Please check, Hisham, I don't think the above statement is required. I've commented it out for now.
 
     # No need of Custom JSON encoder for this
     return jsonify({
@@ -240,7 +236,6 @@ def deleteRefugee(id):
     # Recieving details of the refugee
     # Getting the refugee object from the database
     # Look up the refugeeID in the refugee table
-    # refugee_to_delete = db.session.execute(db.select(Refugee).filter_by(Name=refugee_details["Name"])).scalar_one()
     
     # You need to be logged in to delete a refugee
     if not session.get("user_id"):
@@ -250,6 +245,10 @@ def deleteRefugee(id):
     # If the refugee doesn't exist
     if ref is None:
         return jsonify({"error": "Refugee not found"}),404
+    
+    # Checking if the refugee belongs to the camp logged in
+    if ref.CampID != session.get("user_id"):
+        return jsonify({"error": "Refugee doesn't belong to the camp logged in."}),404
     
     db.session.delete(ref)
     deletedRefugee = {
@@ -269,25 +268,36 @@ def deleteRefugee(id):
 
 
 # Deleting a camp -> Deleting an account
-@app.route('/api/delete/camp',methods=["DELETE"])
+@app.route('/api/delete/camp/<id>',methods=["DELETE"])
 def deleteCamp():
-    # Recieving details of the camp
-    camp_details = request.get_json()
     # Getting the camp object from the database
-    camp_to_delete = Camp.query.filter_by(CampID=camp_details["CampID"]).first()
-    # If the camp doesn't exist
+    camp_to_delete = Camp.query.filter_by(CampID=id).first()
+
+    # Checking if the camp exists
     if camp_to_delete is None:
         return jsonify({"error": "Camp not found"}),404
     
+    camp_details = {
+            "CampID": camp_to_delete.CampID,
+            "AdminName": camp_to_delete.AdminName,
+            "CampName": camp_to_delete.CampName,
+            "CampAddress": camp_to_delete.CampAddress,
+            "NumberOfRefugees": camp_to_delete.NumberOfRefugees,
+            "created_at": camp_to_delete.created_at
+    }
     db.session.delete(camp_to_delete)
     db.session.commit()
-    return jsonify(camp_details)
+    return jsonify(camp_to_delete),204
 
 # Getting all the camps
 @app.route('/api/get/all/camps',methods=["GET"])
 def getAllCamps():
     # Getting all the camps from the database
     camps = Camp.query.all()
+
+    # Checking if no camps were found
+    if camps is None:
+        return jsonify({"error": "No camps found"}),404
     # Creating a list of all the camps
     camps_list = []
     for camp in camps:
@@ -300,13 +310,19 @@ def getAllCamps():
             "created_at": camp.created_at
         }
         camps_list.append(camp_details)
-    return jsonify(camps_list)
+    
+    return jsonify(camps_list),200
 
 # Getting all the refugees
 @app.route('/api/get/all/refugees',methods=["GET"])
 def getAllRefugees():
     # Getting all the refugees from the database
     refugees = Refugee.query.all()
+
+    # Checking if no refugees were found
+    if refugees is None:
+        return jsonify({"error": "No refugees found"}),404
+    
     # Creating a list of all the refugees
     refugees_list = []
     for refugee in refugees:
@@ -323,7 +339,7 @@ def getAllRefugees():
         refugees_list.append(refugee_details)
     return jsonify(refugees_list)
 
-# Getting refugees based on the CountryOfOrigin and CampID
+# Getting refugees based on the Name, CountryOfOrigin or CampID
 @app.route('/api/get/refugees',methods=["GET"])
 def getRefugees():
     args = request.args
@@ -331,7 +347,7 @@ def getRefugees():
     campID = args.get("CampID")
 
     if country is None and campID is None:
-        return jsonify({"error": "No parameters were given"}),404
+        return jsonify({"error": "No parameters were given"}),400
     elif country is None:
         # Find refugees from a single camp
         refugees = Refugee.query.filter_by(CampID=campID).order_by(Refugee.MessageDate.desc()).all()
@@ -342,6 +358,7 @@ def getRefugees():
         # Find refugees from a single camp and country
         refugees = Refugee.query.filter_by(CampID=campID,CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
     
+    # Checking if no refugees were found
     if len(refugees) == 0:
         return jsonify({"error": "No refugees found"}),404
     
@@ -395,7 +412,7 @@ def getCamp():
     }
     return jsonify(camp_details),200
 
-    
+ 
 # Dummy method to add all the data to the camp table
 @app.route('/api/post/camp/all',methods=["POST"])
 def addAllCamps():
