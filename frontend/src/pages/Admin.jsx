@@ -9,7 +9,7 @@ import AxFetch from '../utils/axios';
 function Admin() {
     const [isActive, setActive] = useState(false)
     const [query, setQuery] = useState("")
-    const [info, setInfo, user, setUser] = useOutletContext()
+    const [info, setInfo, user, setUser, campRefs, setCampRefs] = useOutletContext()
     const location = useLocation();
 
     const navigate = useNavigate()
@@ -17,8 +17,8 @@ function Admin() {
     useEffect(() => {
         console.log(user, location.pathname)
         if (location.pathname == '/admin') {
-            console.log('HAHAHHAHAHAHAH')
-            if (!(user?.CampId) && !(JSON.parse(localStorage.getItem("id")))) navigate('/')
+            console.log('HAHAHHAHAHAHAH ', user)
+            if (!(user?.CampID)) navigate('/')
         }
     }, [user])
 
@@ -33,10 +33,28 @@ function Admin() {
 
     // }, [])
 
-    // const {data, isLoading, error} = useQuery(
-    //     ['camp-refugees'],
-    //     async ()=> await AxFetch.get("")
-    //   )
+    const getRefByCampId = async () => {
+        const data = await AxFetch.get('/api/getId');
+        const { id } = data.data
+        console.log(data, id, "fdfdghffhdhfdhghdfg")
+        if (!id) return setUser(null);
+        else return AxFetch.get('api/get/refugees?CampID=' + id)
+    }
+
+    const { data, status, isFetching, isLoading, error } = useQuery(
+        ['camp-refugees'],
+        getRefByCampId, {
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        retry: false
+    }
+    )
+
+    useEffect(() => {
+        // console.log(data?.data)
+        if (status == "success") setCampRefs(data?.data)
+    }, [status, data])
+
 
     const editEntry = (id) => {
         // fetch('http://127.0.0.1:5000/api/update/refugee')
@@ -80,7 +98,7 @@ function Admin() {
                 </div>
                 {/* {JSON.stringify(Data)} */}
                 {
-                    info && <DataTable data={info} query={query} deleteEntry={deleteEntry == undefined ? '' : deleteEntry} editEntry={editEntry == undefined ? '' : editEntry} />
+                    info && <DataTable data={campRefs} query={query} deleteEntry={deleteEntry == undefined ? '' : deleteEntry} editEntry={editEntry == undefined ? '' : editEntry} />
                 }
                 {
                     !info && <h1>No data for now:(</h1>

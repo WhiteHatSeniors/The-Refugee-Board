@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useOutlet, useOutletContext } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { useLocation, useNavigate, useOutlet, useOutletContext } from 'react-router-dom'
 
 function CreateEntry() {
     const [age, setAge] = useState(null)
@@ -7,8 +7,19 @@ function CreateEntry() {
     const [gender, setGender] = useState(null)
     const [origin, setOrigin] = useState(null)
     const [message, setMessage] = useState(null)
+    const [info, setInfo, user, setUser] = useOutletContext()
+    const location = useLocation();
+    const navigate = useNavigate()
 
-    const [info, setInfo] = useOutletContext()
+
+    useEffect(() => {
+        console.log(user, location.pathname)
+        if (location.pathname == '/create-entry') {
+            console.log('HAHAHHAHAHAHAH ', user)
+            if (!(user?.CampID)) navigate('/')
+        }
+    }, [user])
+
     const subHandler = async (e) => {
         try {
             e.preventDefault()

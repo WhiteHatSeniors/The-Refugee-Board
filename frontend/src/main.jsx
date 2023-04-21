@@ -14,13 +14,14 @@ import ErrorPage from "./pages/ErrorPage"
 import Navbar from './components/Navbar';
 import CreateEntry from './pages/CreateEntry';
 import Root from './Root';
+import RootWrapper from './RootWrapper';
 // import { AuthContextProvider } from './Hooks/AuthContext';
 
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root />,
+    element: <RootWrapper />,
     errorElement: <ErrorPage />,
     children: [
       {
