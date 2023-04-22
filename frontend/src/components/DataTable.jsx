@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Pagination from './Pagination';
 
-const col = ["Name", "Gender", "CountryOfOrigin", "Age", "Message", "MessageDate"]
+// const col = ["Name", "Gender", "CampName", "CountryOfOrigin", "Age", "Message", "MessageDate"]
 
 function capitalizeFirstLetter(str) {
 
@@ -17,7 +17,7 @@ const ThData = ({ column }) => column.map((data, id) => <th key={id} className='
 const TdData = ({ data, column, deleteEntry, editEntry }) => {
     if (data) {
         console.log(data)
-        console.log(column)
+        // console.log(column)
         return data.map((data, id) => {
             return (
                 <tr key={id}>
@@ -37,7 +37,7 @@ const TdData = ({ data, column, deleteEntry, editEntry }) => {
 
 
 
-export default function DataTable({ data, query, deleteEntry, editEntry }) {
+export default function DataTable({ data, query, deleteEntry, editEntry, col }) {
     // console.log(data)
 
     // User is currently on this page
@@ -48,11 +48,11 @@ export default function DataTable({ data, query, deleteEntry, editEntry }) {
 
     const indexOfLastRecord = currentPage * recordsPerPage;
     const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-    console.log(data)
+    console.log(data, indexOfFirstRecord, indexOfLastRecord)
     const currentRecords = !data ? "" : data.slice(indexOfFirstRecord, indexOfLastRecord);
 
 
-    console.log(data)
+    console.log(data, currentRecords)
     if (data) {
         let column = Object.keys(data[0]);
         column = column.filter(el => (el != "RefugeeID" && el != "CampID"))

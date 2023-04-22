@@ -120,6 +120,8 @@ def createNewCamp():
     email=camp_details["CampEmail"]
     password=camp_details["password"]
     confirmPassword=camp_details["confirmPassword"]
+    # confirmPassword=camp_details["CampAddress"]
+    # confirmPassword=camp_details["CampName"]
 
     # Checking if the user exists
     user_exists=Camp.query.filter_by(CampEmail=email).first() is not None
@@ -190,6 +192,7 @@ def login():
 
     # print(user,user.CampID)
     session["user_id"]=user.CampID
+    print(session)
 
     # No need of Custom JSON encoder for this
     return jsonify({
@@ -222,21 +225,39 @@ def createNewRefugee():
         return jsonify({"error": "Not logged in"}), 403
     
     # The HTTP 403 Forbidden response status code indicates that the server understands the request but refuses to authorize it
-
+    logged_in_camp=Camp.query.filter_by(CampID=session.get("user_id")).first()
     refugee_details = request.get_json()
     # Creating a new refugee object
     print("Ref details: ",refugee_details)
-    new_refugee = Refugee(CampID= session.get("user_id")
+    id=session.get("user_id");
+    new_refugee = Refugee(CampID= id
                         #   or refugee_details["CampID"]
                           ,
                             Name = refugee_details["Name"],
                             Gender = refugee_details["Gender"],
                             Age = refugee_details["Age"],
                             CountryOfOrigin = refugee_details["CountryOfOrigin"],
-                            Message = refugee_details["Message"])
+                            Message = refugee_details["Message"],
+                            # CampName=logged_in_camp.CampName,
+                            # CampAddress=logged_in_camp.CampAddress
+                            )
     db.session.add(new_refugee)
+    # print(new_refugee.MessageDate)
     db.session.commit()
-    return jsonify({"data": new_refugee}),201
+    ref_info={
+            'CampID' : id,
+            'Name'  :  new_refugee.Name,
+            'Gender'  :  new_refugee.Gender,
+            'Age'  :  new_refugee.Age,
+            'CountryOfOrigin'  :  new_refugee.CountryOfOrigin,
+            'Message'  :  new_refugee.Message,
+            'MessageDate'  :  new_refugee.MessageDate,
+            'CampName' : logged_in_camp.CampName,
+            'CampAddress' : logged_in_camp.CampAddress
+    }
+
+    print("REF:: " ,ref_info)
+    return jsonify({"data": ref_info }),201
 
 # Deleting a refugee
 @app.route('/api/delete/refugee/<id>',methods=["DELETE"])
@@ -331,9 +352,11 @@ def getAllRefugees():
     if refugees is None:
         return jsonify({"error": "No refugees found"}),404
     
+    logged_in_camp=Camp.query.filter_by(CampID=session.get("user_id")).first()
     # Creating a list of all the refugees
     refugees_list = []
     for refugee in refugees:
+        ref_camp=Camp.query.filter_by(CampID=refugee.CampID).first()
         refugee_details = {
             "RefugeeID": refugee.RefugeeID,
             "CampID": refugee.CampID,
@@ -342,7 +365,9 @@ def getAllRefugees():
             "Gender": refugee.Gender,
             "CountryOfOrigin": refugee.CountryOfOrigin,
             "Message": refugee.Message,
-            "MessageDate": refugee.MessageDate
+            "MessageDate": refugee.MessageDate,
+            'CampName' : ref_camp.CampName,
+            'CampAddress' : ref_camp.CampAddress
         }
         refugees_list.append(refugee_details)
     return jsonify(refugees_list)
@@ -385,9 +410,11 @@ def getRefugees():
     if len(refugees) == 0:
         return jsonify({"error": "No refugees found"}),404
     
+    
     # Creating a list of all the refugees
     refugees_list = []
     for refugee in refugees:
+        ref_camp=Camp.query.filter_by(CampID=refugee.CampID).first()
         refugee_details = {
             "RefugeeID": refugee.RefugeeID,
             "CampID": refugee.CampID,
@@ -396,7 +423,9 @@ def getRefugees():
             "Age": refugee.Age,
             "CountryOfOrigin": refugee.CountryOfOrigin,
             "Message": refugee.Message,
-            "MessageDate": refugee.MessageDate
+            "MessageDate": refugee.MessageDate,
+            'CampName' : ref_camp.CampName,
+            'CampAddress' : ref_camp.CampAddress
         }
         refugees_list.append(refugee_details)
     

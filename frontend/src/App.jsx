@@ -43,11 +43,11 @@ function App() {
       <h1 className='font-bold text-6xl p-10'>The Refugee Board</h1>
       <div className='text-center'>
         <div className='flex-row'>
-          <input placeholder="Enter name" onChange={event => setQuery(event.target.value)} onClick={event => setActive(prev => !prev)} className={isActive ? 'border-black border-2 px-7 py-3 w-[80%]' : 'border-black border-y px-7 py-3 w-[60%]'} />
+          <input placeholder="Enter name" onChange={event => setQuery(event.target.value)} onClick={event => setActive(prev => !prev)} className={/*isActive ? 'border-black border-2 px-7 py-3 w-[80%]' :*/ 'border-black border-y px-7 py-3 w-[60%]'} />
           <FcSearch className='text-center inline-block text-4xl ' />
         </div>
         {/* {JSON.stringify(Data)} */}
-        <DataTable data={info} query={query} deleteEntry={undefined} editEntry={undefined} />
+        <DataTable data={info} query={query} col={["Name", "Gender", "CampName", "CampAddress", "CountryOfOrigin", "Age", "Message", "MessageDate"]} deleteEntry={undefined} editEntry={undefined} />
       </div>
     </div>
   )

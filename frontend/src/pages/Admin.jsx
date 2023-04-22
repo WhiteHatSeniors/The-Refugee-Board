@@ -3,7 +3,7 @@ import { FcSearch } from 'react-icons/fc';
 // import Data from "../mock-data.json"
 import DataTable from '../components/DataTable';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
-import { useQuery } from "@tanstack/react-query"
+import { useQueryClient, useQuery, QueryClient, useMutation } from "@tanstack/react-query"
 import AxFetch from '../utils/axios';
 
 function Admin() {
@@ -11,14 +11,14 @@ function Admin() {
     const [query, setQuery] = useState("")
     const [info, setInfo, user, setUser, campRefs, setCampRefs] = useOutletContext()
     const location = useLocation();
-
+    const queryClient = useQueryClient()
     const navigate = useNavigate()
 
     useEffect(() => {
-        console.log(user, location.pathname)
+        // console.log(user, location.pathname)
         if (location.pathname == '/admin') {
-            console.log('HAHAHHAHAHAHAH ', user)
-            if (!(user?.CampID)) navigate('/')
+            // console.log('HAHAHHAHAHAHAH ', user)
+            if (!(user?.CampID) && !(localStorage.getItem("id"))) navigate('/')
         }
     }, [user])
 
@@ -38,10 +38,12 @@ function Admin() {
         const { id } = data.data
         console.log(data, id, "fdfdghffhdhfdhghdfg")
         if (!id) return setUser(null);
-        else return AxFetch.get('api/get/refugees?CampID=' + id)
+        const refs = await AxFetch.get('api/get/refugees?CampID=' + id)
+        console.log(refs)
+        return refs?.data
     }
 
-    const { data, status, isFetching, isLoading, error } = useQuery(
+    const { status, isFetching, isLoading, error, data: campRefugees } = useQuery(
         ['camp-refugees'],
         getRefByCampId, {
         refetchOnMount: false,
@@ -51,9 +53,9 @@ function Admin() {
     )
 
     useEffect(() => {
-        // console.log(data?.data)
-        if (status == "success") setCampRefs(data?.data)
-    }, [status, data])
+        console.log(campRefugees)
+        if (status == "success") setCampRefs(campRefugees)
+    }, [status, campRefugees?.data])
 
 
     const editEntry = (id) => {
@@ -61,14 +63,46 @@ function Admin() {
         console.log('Editing ' + id)
     }
 
+    const deleteHelperFn = async (refId) => {
+        const data = await AxFetch.get('/api/getId');
+        const { id } = data.data
+        console.log(data, id, "fdfdghffhdhfdhghdfg")
+        //Checking if user is authorized
+        if (!id) return setUser(null);
+        else return AxFetch.delete(`/api/delete/refugee/${refId}`)
+    }
+
+    const { mutate: deleteMutation } = useMutation(
+        deleteHelperFn, //mutationFn
+        {
+            onMutate: async (id) => {
+                await queryClient.cancelQueries(["camp-refugees"])
+                console.log(queryClient.getQueriesData(["camp-refugees"]))
+                queryClient.setQueryData(["camp-refugees"], (prevData) => prevData.filter(ele => ele.RefugeeID != id))
+            },
+            onSuccess: (data) => {
+                console.log(data)
+                // navigate('/');
+                // queryClient.setQueryData(['camp-refugees'],  )
+            },
+            onError: (error) => {
+                console.log(error)
+            }
+        });
+
+
     const deleteEntry = async (id) => {
 
-        try {
-            await AxFetch.delete(`/api/delete/refugee/${id}`)
-            setInfo((prev) => prev.filter(ele => ele.RefugeeID != id))
-        } catch (err) {
-            console.log(err)
-        }
+        setInfo((prev) => prev.filter(ele => ele.RefugeeID != id))
+        setCampRefs((prev) => prev.filter(ele => ele.RefugeeID != id))
+        deleteMutation(id)
+
+        // try {
+        //     await AxFetch.delete(`/api/delete/refugee/${id}`)
+        //         ((prev) => prev.filter(ele => ele.RefugeeID != id))
+        // } catch (err) {
+        //     console.log(err)
+        // }
 
 
         // fetch(`/api/delete/refugee/${id}`, {
@@ -98,7 +132,7 @@ function Admin() {
                 </div>
                 {/* {JSON.stringify(Data)} */}
                 {
-                    info && <DataTable data={campRefs} query={query} deleteEntry={deleteEntry == undefined ? '' : deleteEntry} editEntry={editEntry == undefined ? '' : editEntry} />
+                    info && <DataTable data={campRefugees} col={["Name", "Gender", "CountryOfOrigin", "Age", "Message", "MessageDate"]} query={query} deleteEntry={deleteEntry == undefined ? '' : deleteEntry} editEntry={editEntry == undefined ? '' : editEntry} />
                 }
                 {
                     !info && <h1>No data for now:(</h1>
