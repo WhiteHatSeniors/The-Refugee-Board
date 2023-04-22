@@ -88,6 +88,24 @@
     - If the camp is not found, a 404 is thrown.
     - The camp will be deleted from the database and the camp's details will be returned along with a 204 status code.
 
+## PATCH Methods
+
+1. Updating/Editing a refugee entry:
+    - *PATCH* ```/api/patch/refugee```
+    - Updates a refugee entry in the database.
+    - The user (Camp representative) must be logged in, otherwise a 403 is thrown.
+    - All updated details should be sent as a JSON object. It *must* include all of the following:
+        1. RefugeeID
+        2. Name
+        3. Gender
+        4. CountryOfOrigin
+        5. Age
+        6. Message
+    - NOTE: The RefugeeID is used to identify the refugee to be updated.
+    - NOTE: This also updates the message date field with the current date and time.
+    - If the refugee is not found, a 404 is thrown.
+    - The refugee must be associated with the currently logged in user (Camp representative)'s CampID, otherwise a 403 is thrown.
+
 ## Methods for development
 
 1. Add all camps

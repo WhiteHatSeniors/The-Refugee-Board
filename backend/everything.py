@@ -462,24 +462,38 @@ def addAllRefugees():
     return jsonify(refugees)
 
 # Updating a refugees details
-@app.route('/api/update/refugee',methods=["PATCH"])
+@app.route('/api/patch/refugee',methods=["PATCH"])
 def updateRefugee():
-    #### NEEDS REWORKING
-    # Recieving details of the refugee
-    refugee = Refugee.query.get_or_404(request.form["RefugeeID"])
 
+    # You need to be logged in to update a refugee entry
+    # if not session.get("user_id"):
+    #     return jsonify({"error": "Not logged in"}), 403
+    
+    # Recieving details of the refugee
+    updatedDetails = request.get_json() # Expecting a JSON object with the RefugeeID and ALL the updated details.
+    refugee = Refugee.query.get_or_404(updatedDetails["RefugeeID"]) # Automatically sends a 404 if not found
+
+    # Checking if the logged in camp representative is allowed to update the refugee
+    # Checking if the refugee belongs to the same camp as the logged in camp representative.
+    # if refugee.CampID != session.get("user_id"):
+    #     return jsonify({"error": "You are not allowed to update this refugee"}), 403
+    
     if request.method == 'PATCH':
-        refugee.Name = request.form['Name']
-        refugee.Gender = request.form['Gender']
-        refugee.CountryOfOrigin = request.form['CountryOfOrigin']
-        refugee.Age = int(request.form['Age'])
-        refugee.Message = request.form['Message']
+        # Updating the refugee
+        refugee.Name = updatedDetails['Name']
+        refugee.Gender = updatedDetails['Gender']
+        refugee.CountryOfOrigin = updatedDetails['CountryOfOrigin']
+        refugee.Age = updatedDetails['Age']
+        refugee.Message = updatedDetails['Message']
         refugee.MessageDate = datetime.now()
 
-        db.session.add(refugee)
+        db.session.add(refugee) # SQL Alchemy will update if it exists.
         db.session.commit()
 
-        return jsonify({"RefugeeID": refugee.RefugeeID, "Success":"Thumbs up"})
+        return jsonify(updatedDetails),200
+    else:
+        # Some other method was used
+        return jsonify({"error": "Method not allowed"}),405
 
 # Running the app
 if(__name__=="__main__"):
