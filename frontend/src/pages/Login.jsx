@@ -26,7 +26,7 @@ export default function Login() {
         }
     }, [user])
 
-    const { mutate: signInMutation, data: userData } = useMutation({
+    const { mutate: signInMutation, data: userData, error, isError, isLoading } = useMutation({
         mutationFn: (data) => signIn(data.email, data.password),
         onSuccess: (data) => {
             console.log(data)
@@ -36,7 +36,11 @@ export default function Login() {
                 setUser(data.data)
                 localStorage.setItem("id", JSON.stringify(data.data.CampID))
                 queryClient.setQueryData(['User'], data)
-                // localStorage.setItem("id", JSON.stringify(data.data.CampID))
+                setEmail("")
+                setPw("")
+                // setTimeout(() => {
+                //     navigate('/admin')
+                // }, 1500)
             }
         },
         onError: (error) => {
@@ -48,7 +52,6 @@ export default function Login() {
         e.preventDefault();
         const data = { email, password: pw }
         await signInMutation(data)
-        navigate('/admin')
         // setTimeout(() => {
         //     navigate("/attendance");
         // }, 1500);
@@ -57,6 +60,8 @@ export default function Login() {
     const togglePassword = () => {
         setPasswordShown(!passwordShown);
     };
+
+    console.log("ERRRRR ", error, isError)
 
     return (
         <form
@@ -106,7 +111,8 @@ export default function Login() {
                 //         navigate('/admin')
                 //     }, 1000)
                 // }}
-                className="inline-block px-7 py-3 w-[75%] bg-blue-600 text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out mb-8"
+                className={isLoading ? "inline-block px-7 py-3 w-[75%] bg-slate-500 text-black" : "inline-block px-7 py-3 w-[75%] bg-blue-600 text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out mb-8"}
+                disabled={isLoading ? true : false}
                 type="submit"
             >
                 Sign In
@@ -115,6 +121,12 @@ export default function Login() {
                 Not yet registered?{" "}
                 <span className="underline text-blue-900 hover:text-white">Signup</span>
             </Link>
+            {userData?.status >= 400 && <div class="p-2 my-4 text-sm text-red-800 rounded-lg bg-red-50 dark:text-red-600" role="alert">
+                <span class="font-medium">{userData?.error}</span></div>}
+            {userData?.status < 299 && <div class="p-2 my-4 text-sm text-green-800 rounded-lg bg-green-50 dark:text-green-600" role="alert">
+                <span class="font-medium">Succesfully Logged in!</span></div>}
+
+            {isError && <p>Unfortunate Error encounterd {error}</p>}
         </form>
     );
 }

@@ -26,23 +26,27 @@ export default function Login() {
         }
     }, [user])
 
-    const signUpFunc = async (signUpData) => {
-        // const data = await AxFetch.get('/api/getId');
-        // const { id } = data.data
-        // console.log(data, id, "fdfdghffhdhfdhghdfg")
-        // //Checking if user is authorized
-        // if (id) return;
-        return AxFetch.post(`/api/register`, signUpData)
-    }
+    // const signUpFunc = async (signUpData) => {
+    //     const data = await AxFetch.get('/api/getId');
+    //     const { id } = data.data
+    //     // console.log(data, id, "fdfdghffhdhfdhghdfg")
+    //     // //Checking if user is authorized
+    //     if (id) return;
+    //     const response = await AxFetch.post(`/api/register`, signUpData)
+    //     consolee.log("HEYYYY: ", { data: response.data.data, error: response.data.error, status: response.status })
+    //     return { data: response.data.data, error: response.data.error, status: response.status }
+    // }
 
-    const { mutate: signUpMutation, data: signUpData, isLoading } = useMutation(
-        signUpFunc,
+    const { mutate: signUpMutation, data: signUpData, isLoading, isError, error } = useMutation(
+        register,
         {
             onSuccess: (data) => {
                 console.log(data)
                 if (data.status <= 299) {
-                    console.log(data.data)
-                    // localStorage.setItem("id", JSON.stringify(data.data.CampID))
+                    setRegisterData({})
+                    setTimeout(() => {
+                        navigate('/login')
+                    }, 2000)
                 }
             },
             onError: (error) => {
@@ -54,6 +58,7 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log(registerData)
         await signUpMutation(registerData)
         // navigate('/login')
         // setTimeout(() => {
@@ -61,9 +66,7 @@ export default function Login() {
         // }, 1500);
     };
 
-    const togglePassword = () => {
-        setPasswordShown(!passwordShown);
-    };
+    console.log("ERRRRR ", error)
 
     return (
         <form
@@ -76,7 +79,7 @@ export default function Login() {
                 type="email"
                 id="em"
                 onChange={(e) => setRegisterData(prev => ({ ...prev, CampEmail: e.target.value }))}
-                value={registerData ? registerData.CampEmail : ""}
+                value={registerData.CampEmail ? registerData.CampEmail : ""}
                 className="form-control block w-[75%] mx-auto px-4 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none my-9"
                 placeholder="Email address"
             />
@@ -85,7 +88,7 @@ export default function Login() {
                 type="password"
                 id="pw"
                 onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
-                value={registerData ? registerData.password : ""}
+                value={registerData.password ? registerData.password : ""}
                 className="form-control block w-[75%] mx-auto px-4 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none my-9"
                 placeholder="Password"
             />{" "}
@@ -93,7 +96,7 @@ export default function Login() {
                 type="password"
                 id="cpw"
                 onChange={(e) => setRegisterData(prev => ({ ...prev, ConfirmPassword: e.target.value }))}
-                value={registerData ? registerData.ConfirmPassword : ""}
+                value={registerData.ConfirmPassword ? registerData.ConfirmPassword : ""}
                 className="form-control block w-[75%] mx-auto px-4 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none my-9"
                 placeholder="Confirm Password"
             />{" "}
@@ -101,7 +104,7 @@ export default function Login() {
                 type="text"
                 id="camp-name"
                 onChange={(e) => setRegisterData(prev => ({ ...prev, CampName: e.target.value }))}
-                value={registerData ? registerData.CampName : ""}
+                value={registerData.CampName ? registerData.CampName : ""}
                 className="form-control block w-[75%] mx-auto px-4 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none my-9"
                 placeholder="Camp Name"
             />{" "}
@@ -109,7 +112,7 @@ export default function Login() {
                 type="text"
                 id="camp-address"
                 onChange={(e) => setRegisterData(prev => ({ ...prev, CampAddress: e.target.value }))}
-                value={registerData ? registerData.CampAddress : ""}
+                value={registerData.CampAddress ? registerData.CampAddress : ""}
                 className="form-control block w-[75%] mx-auto px-4 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none my-9"
                 placeholder="Camp Address"
             />{" "}
@@ -130,6 +133,12 @@ export default function Login() {
                 Already registered?{" "}
                 <span className="underline text-blue-900 hover:text-white">Login</span>
             </Link>
+            {signUpData?.status >= 400 && <div className="p-2 my-4 text-sm text-red-800 rounded-lg bg-red-50 dark:text-red-600" role="alert">
+                <span className="font-medium">{signUpData?.error}</span></div>}
+            {signUpData?.status < 299 && <div className="p-2 my-4 text-sm text-green-800 rounded-lg bg-green-50 dark:text-green-600" role="alert">
+                <span className="font-medium">Succesfully Signed up!</span></div>}
+
+            {isError && <p>Unfortunate Error encounterd {error.response}</p>}
         </form>
     );
 }

@@ -137,18 +137,19 @@ def createNewCamp():
     
     if user_exists:
         return jsonify({"error": "User already exists"}),409
-
-    # Validating user email
-    is_valid = validate_email(email) 
-    if not is_valid:  
-        return jsonify({"error": "Invalid Email ID"}),401
-        # 401 Unauthorized response status code indicates that the client request has not been completed because it lacks valid authentication credentials
-
+   
     # Validating user password
     if password != confirmPassword:
         return jsonify({"error": "Passwords not matching"}),401
     if not validate_password(password): # Peek the definition of this function for password constraints
         return jsonify({"error": "Invaid password pattern."}),401
+    
+     # Validating user email
+    is_valid = validate_email(email) 
+    if not is_valid:  
+        return jsonify({"error": "Invalid Email ID"}),401
+        # 401 Unauthorized response status code indicates that the client request has not been completed because it lacks valid authentication credentials
+
 
     # Hashing the password
     hashed_password=bcrypt.generate_password_hash(password)
@@ -222,7 +223,7 @@ def logout_user():
 @app.route("/api/getId", methods=["GET"])
 def get_id():
     if not session.get("user_id"):
-        return jsonify({"id": None}),404
+        return jsonify({"id": None}),200
     return jsonify({"id": session.get("user_id")}),200
 
 # Adding a refugee
