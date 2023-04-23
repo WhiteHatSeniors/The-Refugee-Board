@@ -68,7 +68,9 @@ class Camp(db.Model):
     NumberOfRefugees: int = db.Column(db.Integer, default=0)
     created_at: datetime = db.Column(db.DateTime(timezone=True), server_default=func.now())
     
-    refugees = relationship("Refugee",cascade="all, delete-orphan") # On Delete Cascade
+    # refugees = relationship("Refugee",cascade="all, delete-orphan") # On Delete Cascade
+    refugees = relationship("Refugee", back_populates="camp",cascade="all, delete-orphan") 
+    
 
     def __repr__(self):
          return f'<Camp Details {self.CampName}>'
@@ -85,6 +87,8 @@ class Refugee(db.Model):
     CountryOfOrigin: str = db.Column(db.String(50))
     MessageDate: datetime = db.Column(db.DateTime(timezone=True), server_default=func.now())
     Message: str = db.Column(db.String(1000))
+
+    camp=relationship("Camp", back_populates="refugees") 
 
     
 
@@ -388,6 +392,7 @@ def getRefugees():
     args = request.args
     country = args.get("CountryOfOrigin")
     campName = args.get("CampName")
+    # campID = args.get("CampID")
     name = args.get("Name")
 
     if name is None:
@@ -395,26 +400,34 @@ def getRefugees():
             return jsonify({"error": "No parameters were given"}),400
         elif country is None:
             # Find refugees from a single camp
-            refugees = Refugee.query.filter_by(CampName=campName).order_by(Refugee.MessageDate.desc()).all()
+
+            # Getting refugees by campname(exact match)
+            # refugees=Refugee.query.filter(Refugee.camp.has(Camp.CampName == campName)).order_by(Refugee.MessageDate.desc()).all() 
+
+            # Getting refugees by campname(specified pattern in a column)(all matches)
+            refugees=Refugee.query.filter(Refugee.camp.has(Camp.CampName.like(f"%{campName}%"))).order_by(Refugee.MessageDate.desc()).all()
+
+            # Reference : https://stackoverflow.com/questions/34804756/sqlalchemy-filter-many-to-one-relationship-where-the-one-object-has-a-list-cont
         elif campName is None:
             # Find refugees from a single country
             refugees = Refugee.query.filter_by(CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
         else:
             # Find refugees from a single camp and country
-            refugees = Refugee.query.filter_by(CampName=campName,CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
+            # refugees = Refugee.query.filter_by(CampName=campName,CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
+            refugees = Refugee.query.filter(Refugee.camp.has(Camp.CampName.like(f"%{campName}%")),Refugee.CountryOfOrigin==country).order_by(Refugee.MessageDate.desc()).all()
     else:
         if country is None and campName is None:
             # Find refugees LIKE name
             refugees = Refugee.query.filter(Refugee.Name.like(f"%{name}%")).order_by(Refugee.MessageDate.desc()).all()
         elif country is None:
             # Find refugees with LIKE name from a single camp
-            refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.CampName==campName)).order_by(Refugee.MessageDate.desc()).all()
+            refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.camp.has(Camp.CampName.like(f"%{campName}%")))).order_by(Refugee.MessageDate.desc()).all()
         elif campName is None:
             # Find refugees with LIKE name from a single country
             refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.CountryOfOrigin==country)).order_by(Refugee.MessageDate.desc()).all()
         else:
             # Find refugees with a LIKE name from a single camp and country
-            refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.CampName==campName,Refugee.CountryOfOrigin==country)).order_by(Refugee.MessageDate.desc()).all()
+            refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.camp.has(Camp.CampName.like(f"%{campName}%")),Refugee.CountryOfOrigin==country)).order_by(Refugee.MessageDate.desc()).all()
     
     # Checking if no refugees were found
     if len(refugees) == 0:
