@@ -119,15 +119,24 @@ def createNewCamp():
 
     email=camp_details["CampEmail"]
     password=camp_details["password"]
-    confirmPassword=camp_details["confirmPassword"]
-    # confirmPassword=camp_details["CampAddress"]
-    # confirmPassword=camp_details["CampName"]
+    confirmPassword=camp_details["ConfirmPassword"]
+    address=camp_details["CampAddress"]
+    camp_name=camp_details["CampName"]
 
     # Checking if the user exists
-    user_exists=Camp.query.filter_by(CampEmail=email).first() is not None
+    user_exists=Camp.query.filter_by(CampEmail=email.strip()).first() is not None
     if user_exists:
         return jsonify({"error": "User already exists"}),409
+   
         # 409- (Conflict) indicates that the request could not be processed because of conflict in the request
+
+    address_exists=Camp.query.filter_by(CampAddress=address.strip()).first() is not None
+    camp_exists=Camp.query.filter_by(CampName=camp_name.strip()).first() is not None
+    if address_exists and camp_exists:
+        return jsonify({"error": "User already exists"}),409
+    
+    if user_exists:
+        return jsonify({"error": "User already exists"}),409
 
     # Validating user email
     is_valid = validate_email(email) 

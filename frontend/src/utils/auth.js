@@ -15,11 +15,11 @@ async function signIn(email, password) {
 }
 
 
-async function register(email, password, name, address) {
+async function register({email, password, ConfirmPassword, CampName, CampAddress}) {
     try{
         const response = await AxFetch.post(
             "/api/register",
-            { CampEmail:email, password, CampName: name, CampAddress: address },
+            { CampEmail:email, password, CampName, CampAddress, ConfirmPassword },
           );
           return {data:response.data.data,  status:response.status}
 

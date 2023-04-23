@@ -15,6 +15,7 @@ import Navbar from './components/Navbar';
 import CreateEntry from './pages/CreateEntry';
 import Root from './Root';
 import RootWrapper from './RootWrapper';
+import Signup from "./pages/Signup"
 // import { AuthContextProvider } from './Hooks/AuthContext';
 
 
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <Login />,
+      },
+      {
+        path: "signup",
+        element: <Signup />,
       },
       {
         path: "contact",
