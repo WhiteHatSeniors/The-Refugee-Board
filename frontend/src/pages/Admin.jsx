@@ -93,7 +93,7 @@ function Admin() {
 
     const deleteEntry = async (id) => {
 
-        setInfo((prev) => prev.filter(ele => ele.RefugeeID != id))
+        // setInfo((prev) => prev.filter(ele => ele.RefugeeID != id))
         setCampRefs((prev) => prev.filter(ele => ele.RefugeeID != id))
         deleteMutation(id)
 
@@ -132,10 +132,10 @@ function Admin() {
                 </div>
                 {/* {JSON.stringify(Data)} */}
                 {
-                    info && <DataTable data={campRefugees} col={["Name", "Gender", "CountryOfOrigin", "Age", "Message", "MessageDate"]} query={query} deleteEntry={deleteEntry == undefined ? '' : deleteEntry} editEntry={editEntry == undefined ? '' : editEntry} />
+                    campRefugees && <DataTable data={campRefugees} col={["Name", "Gender", "CountryOfOrigin", "Age", "Message", "MessageDate"]} query={query} deleteEntry={deleteEntry == undefined ? '' : deleteEntry} editEntry={editEntry == undefined ? '' : editEntry} />
                 }
                 {
-                    !info && <h1>No data for now:(</h1>
+                    !campRefugees && <h1>No data for now:(</h1>
                 }
 
             </div>

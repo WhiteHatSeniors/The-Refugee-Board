@@ -13,14 +13,14 @@ function Root() {
     const [campRefs, setCampRefs] = useState(null); //Refugees of a particular camp
     console.log('In the root')
 
-    useEffect(() => {
-        fetch('/api/get/all/refugees')
-            .then(response => response.json())
-            .then(response => {
-                console.log(response)
-                setInfo(response);
-            }).catch(error => console.log(error))
-    }, [])
+    // useEffect(() => {
+    //     fetch('/api/get/all/refugees')
+    //         .then(response => response.json())
+    //         .then(response => {
+    //             console.log(response)
+    //             setInfo(response);
+    //         }).catch(error => console.log(error))
+    // }, [])
 
 
     const getUserFn = async () => {

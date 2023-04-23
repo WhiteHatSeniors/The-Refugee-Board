@@ -4,36 +4,51 @@ import './App.css'
 import Data from "./mock-data.json"
 import DataTable from './components/DataTable';
 import { useOutletContext } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import AxFetch from './utils/axios';
 
 function App() {
   const [isActive, setActive] = useState(false)
   const [info, setInfo] = useOutletContext()
-
-  // useEffect(() => {
-  //   fetch('http://127.0.0.1:5000/api/get/all/refugees')
-  //     .then(response => response.json())
-  //     .then(response => {
-  //       console.log(response)
-  //       setInfo(response);
-  //     }).catch(error => console.log(error))
-
-  // }, [])
-
-  // useEffect(() => {
-  //   // fetch('http://127.0.0.1:5000/api/get')
-  //   // fetch('mock-data.json')
-  //   //   .then(response => response.json())
-  //   //   .then(response => {
-  //   //     console.log(response)
-  //   //     setInfo(response);
-  //   //   })
-  //   //   .catch(error => console.log(error))
-  //   setInfo(Data)
-  //   console.log(Data)
-
-  // }, [])
-
   const [query, setQuery] = useState("")
+
+  // useEffect(() => {
+  //     fetch('/api/get/all/refugees')
+  //         .then(response => response.json())
+  //         .then(response => {
+  //             console.log(response)
+  //             setInfo(response);
+  //         }).catch(error => console.log(error))
+  // }, [])
+
+
+  const getRefsFn = async () => {
+    const res = await AxFetch.get('api/get/refugees?Name=' + query, { validateStatus: false })
+    console.log("HULUFDIFDHFHF ", res)
+    return res.data;
+    // else fetch('api/get/camp?campID=' + id)
+    //     .then(response => response.json())
+    //     .then(response => {
+    //         console.log(response)
+    //         setUser(response);
+    //     }).catch(error => console.log(error))
+  }
+
+  const { data: refsInfo, status, error, isFetching, refetch } = useQuery(["info"], getRefsFn, {
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: false,
+    enabled: false
+  })
+
+  const subHandler = (e) => {
+    e.preventDefault()
+    refetch()
+  }
+  console.log(refsInfo)
+  useEffect(() => {
+    if (status == "success") setInfo(refsInfo)
+  }, [status, refsInfo])
 
   return (
     // <div className="App">
@@ -42,12 +57,14 @@ function App() {
     <div className='p-10'>
       <h1 className='font-bold text-6xl p-10'>The Refugee Board</h1>
       <div className='text-center'>
-        <div className='flex-row'>
+        <form className='flex-row' onSubmit={subHandler}>
           <input placeholder="Enter name" onChange={event => setQuery(event.target.value)} onClick={event => setActive(prev => !prev)} className={/*isActive ? 'border-black border-2 px-7 py-3 w-[80%]' :*/ 'border-black border-y px-7 py-3 w-[60%]'} />
-          <FcSearch className='text-center inline-block text-4xl ' />
-        </div>
+          <button type='submit'><FcSearch className='text-center inline-block text-4xl ' /></button>
+        </form>
         {/* {JSON.stringify(Data)} */}
-        <DataTable data={info} query={query} col={["Name", "Gender", "CampName", "CampAddress", "CountryOfOrigin", "Age", "Message", "MessageDate"]} deleteEntry={undefined} editEntry={undefined} />
+        {!(refsInfo?.error) && <DataTable data={refsInfo} query={query} col={["Name", "Gender", "CampName", "CampAddress", "CountryOfOrigin", "Age", "Message", "MessageDate"]} deleteEntry={undefined} editEntry={undefined} />}
+        {refsInfo?.error && <div className="p-2 my-10 mx-auto w-[60%] text-sm text-red-800 rounded-lg bg-red-100 dark:text-red-700 flex items-center justify-center" role="alert">
+          <span className="font-medium">{refsInfo?.error}</span></div>}
       </div>
     </div>
   )

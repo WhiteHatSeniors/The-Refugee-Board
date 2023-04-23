@@ -15,6 +15,7 @@ from datetime import datetime
 from dataclasses import dataclass
 from validate_email import validate_email  
 from flask_session import Session #server side session
+import pycountry
 
 #Note: USE THIS ONLY WHEN return jsonify isnt working. Use this as custom encoder with json.dumps()
 # import json
@@ -238,9 +239,24 @@ def createNewRefugee():
     if not session.get("user_id"):
         return jsonify({"error": "Not logged in"}), 403
     
+    
     # The HTTP 403 Forbidden response status code indicates that the server understands the request but refuses to authorize it
     logged_in_camp=Camp.query.filter_by(CampID=session.get("user_id")).first()
     refugee_details = request.get_json()
+
+    Name, Age ,Gender, CountryOfOrigin,Message= refugee_details['Name'] and refugee_details['Name'].strip(),refugee_details['Age'] and refugee_details['Age'].strip(), refugee_details['Gender'] and refugee_details['Gender'].strip(),refugee_details['CountryOfOrigin'] and refugee_details['CountryOfOrigin'].strip(),refugee_details['Message'] and refugee_details['Message'].strip()
+
+    if not(Name and Age and Gender and CountryOfOrigin and Message):
+        return {"error": "All fields have to be filled"},400
+    # The HyperText Transfer Protocol (HTTP) 400 Bad Request response status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error 
+    if not Age.isnumeric():
+        return {"error": "Age has to be a number"},400
+    
+    # if not pycountry.countries.search_fuzzy(CountryOfOrigin):
+    # if not pycountry.countries.get(name=CountryOfOrigin):
+    #     return {"error": "Country Not Found"},400
+
+
     # Creating a new refugee object
     print("Ref details: ",refugee_details)
     id=session.get("user_id");
@@ -392,10 +408,15 @@ def getRefugees():
     args = request.args
     country = args.get("CountryOfOrigin")
     campName = args.get("CampName")
-    # campID = args.get("CampID")
+    campID = args.get("CampID")
     name = args.get("Name")
 
-    if name is None:
+    print("ARGS: ",args)
+
+    if campID:
+        refugees = Refugee.query.filter_by(CampID=campID).order_by(Refugee.MessageDate.desc()).all()
+        print(refugees)
+    if name is None and campID is None:
         if country is None and campName is None:
             return jsonify({"error": "No parameters were given"}),400
         elif country is None:
@@ -415,10 +436,11 @@ def getRefugees():
             # Find refugees from a single camp and country
             # refugees = Refugee.query.filter_by(CampName=campName,CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
             refugees = Refugee.query.filter(Refugee.camp.has(Camp.CampName.like(f"%{campName}%")),Refugee.CountryOfOrigin==country).order_by(Refugee.MessageDate.desc()).all()
-    else:
+    elif campID is None:
         if country is None and campName is None:
             # Find refugees LIKE name
             refugees = Refugee.query.filter(Refugee.Name.like(f"%{name}%")).order_by(Refugee.MessageDate.desc()).all()
+            print("REFS: ", refugees)
         elif country is None:
             # Find refugees with LIKE name from a single camp
             refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.camp.has(Camp.CampName.like(f"%{campName}%")))).order_by(Refugee.MessageDate.desc()).all()
@@ -428,9 +450,9 @@ def getRefugees():
         else:
             # Find refugees with a LIKE name from a single camp and country
             refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.camp.has(Camp.CampName.like(f"%{campName}%")),Refugee.CountryOfOrigin==country)).order_by(Refugee.MessageDate.desc()).all()
-    
     # Checking if no refugees were found
     if len(refugees) == 0:
+        print("LLOOLOLOL" ,refugees)
         return jsonify({"error": "No refugees found"}),404
     
     

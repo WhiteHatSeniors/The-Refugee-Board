@@ -70,7 +70,7 @@ export default function DataTable({ data, query, deleteEntry, editEntry, col }) 
             </div>
         )
     }
-    else return <p className='text-red-500'>No information for now</p>
+    // else return <p className='text-red-500'>No information for now</p>
 
 }
 // data.map((post, index) => (

@@ -34,7 +34,7 @@ function CreateEntry() {
         else return AxFetch.post(`/api/post/refugee`, refData)
     }
 
-    const { mutate: createMutation } = useMutation(
+    const { mutate: createMutation, data: mutateData, error: mutateError, isError } = useMutation(
         createHelperFn, //mutationFn
         {
             // onMutate: async () => {
@@ -49,16 +49,21 @@ function CreateEntry() {
                 console.log(prevData)
                 console.log([...prevData, data?.data?.data])
                 // queryClient.setQueryData(['camp-refugees'], [data?.data?.data, ...prevData])
-                queryClient.setQueryData(['camp-refugees'], (prev) => {
-                    prev.unshift(data?.data?.data)
-                    console.log(prev)
-                    return prev
-                })
-                setInfo(prev => [data?.data?.data, ...prev])
-                setCampRefs([data?.data?.data, ...prevData])
+                if (!(data?.error)) {
+                    queryClient.setQueryData(['camp-refugees'], (prev) => {
+                        prev.unshift(data?.data?.data)
+                        console.log(prev)
+                        return prev
+                    })
+                    // setInfo(prev => [data?.data?.data, ...prev])
+                    setCampRefs([data?.data?.data, ...prevData])
+                    setTimeout(() => {
+                        navigate('/admin')
+                    }, 2000)
+                }
             },
             onError: (error) => {
-                console.log(error)
+                console.log(error.response.data.error)
             }
         });
 
@@ -66,10 +71,14 @@ function CreateEntry() {
         e.preventDefault()
         // setInfo()
         // setCampRefs((prev) => prev.filter(ele => ele.RefugeeID != id))
-        createMutation({
+        await createMutation({
             Age: age, Name: name, Gender: gender, CountryOfOrigin: origin, Message: message
         })
-        navigate('/admin')
+        console.log("DATA ", mutateData)
+        console.log("isErr ", isError)
+        console.log("ERR ", mutateError)
+
+
         //----------------------------------------
         // try {
         //     e.preventDefault()
@@ -102,6 +111,10 @@ function CreateEntry() {
             <textarea placeholder='Message' onChange={e => setMessage(e.target.value)} className='border-black border m-5 w-[50%] block mx-auto' ></textarea>
             <input type="text" placeholder="Gender" onChange={e => setGender(e.target.value)} className='border-black border m-5 w-[50%] block mx-auto' />
             <button type="submit" className='p-2 rounded-lg bg-yellow-200'>Submit</button>
+            {isError && <div className="p-2 my-10 mx-auto w-[60%] text-sm text-red-800 rounded-lg bg-red-100 dark:text-red-700 flex items-center justify-center" role="alert">
+                <span className="font-medium">{mutateError.response.data.error}</span></div>}
+            {mutateData && !isError && <div className="p-2 my-10 mx-auto w-[60%] text-sm text-green-800 rounded-lg bg-green-50 dark:text-green-600" role="alert">
+                <span className="font-medium">Succesfully added!</span></div>}
             {/* <p>Please select your favorite Web language:</p> */}
             {/* <input type="radio" id="html" name="fav_language" value="HTML" />
             <label for="html">HTML</label>
