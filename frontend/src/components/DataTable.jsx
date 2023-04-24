@@ -53,7 +53,7 @@ export default function DataTable({ data, query, deleteEntry, editEntry, col }) 
 
 
     console.log(data, currentRecords)
-    if (data) {
+    if (data && data.length > 0) {
         let column = Object.keys(data[0]);
         column = column.filter(el => (el != "RefugeeID" && el != "CampID"))
         return (

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useOutlet, useOutletContext } from 'react-router-dom'
 import { useQueryClient, useQuery, QueryClient, useMutation } from "@tanstack/react-query"
 import AxFetch from '../utils/axios';
+import SucMessage from '../components/SucMessage';
 
 function CreateEntry() {
     const [age, setAge] = useState(null)
@@ -47,16 +48,16 @@ function CreateEntry() {
                 // console.log(queryClient.setQueryData(["camp-refugees"]))
                 const prevData = queryClient.getQueryData(['camp-refugees'])
                 console.log(prevData)
-                console.log([...prevData, data?.data?.data])
+                // console.log([...prevData, data?.data?.data])
                 // queryClient.setQueryData(['camp-refugees'], [data?.data?.data, ...prevData])
                 if (!(data?.error)) {
                     queryClient.setQueryData(['camp-refugees'], (prev) => {
-                        prev.unshift(data?.data?.data)
                         console.log(prev)
+                        prev.error ? prev = [data?.data?.data] : prev.unshift(data?.data?.data)
                         return prev
                     })
                     // setInfo(prev => [data?.data?.data, ...prev])
-                    setCampRefs([data?.data?.data, ...prevData])
+                    // setCampRefs([data?.data?.data, ...prevData])
                     setTimeout(() => {
                         navigate('/admin')
                     }, 2000)
@@ -112,9 +113,8 @@ function CreateEntry() {
             <input type="text" placeholder="Gender" onChange={e => setGender(e.target.value)} className='border-black border m-5 w-[50%] block mx-auto' />
             <button type="submit" className='p-2 rounded-lg bg-yellow-200'>Submit</button>
             {isError && <div className="p-2 my-10 mx-auto w-[60%] text-sm text-red-800 rounded-lg bg-red-100 dark:text-red-700 flex items-center justify-center" role="alert">
-                <span className="font-medium">{mutateError.response.data.error}</span></div>}
-            {mutateData && !isError && <div className="p-2 my-10 mx-auto w-[60%] text-sm text-green-800 rounded-lg bg-green-50 dark:text-green-600" role="alert">
-                <span className="font-medium">Succesfully added!</span></div>}
+                <span className="font-medium">{mutateError?.response?.data?.error}</span></div>}
+            {mutateData && !isError && <SucMessage>Succesfully added!</SucMessage>}
             {/* <p>Please select your favorite Web language:</p> */}
             {/* <input type="radio" id="html" name="fav_language" value="HTML" />
             <label for="html">HTML</label>

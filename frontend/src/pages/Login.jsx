@@ -121,10 +121,10 @@ export default function Login() {
                 Not yet registered?{" "}
                 <span className="underline text-blue-900 hover:text-white">Signup</span>
             </Link>
-            {userData?.status >= 400 && <div class="p-2 my-4 text-sm text-red-800 rounded-lg bg-red-50 dark:text-red-600" role="alert">
-                <span class="font-medium">{userData?.error}</span></div>}
-            {userData?.status < 299 && <div class="p-2 my-4 text-sm text-green-800 rounded-lg bg-green-50 dark:text-green-600" role="alert">
-                <span class="font-medium">Succesfully Logged in!</span></div>}
+            {userData?.status >= 400 && <div className="p-2 my-4 text-sm text-red-800 rounded-lg bg-red-50 dark:text-red-600" role="alert">
+                <span className="font-medium">{userData?.error}</span></div>}
+            {userData?.status < 299 && <div className="p-2 my-4 text-sm text-green-800 rounded-lg bg-green-50 dark:text-green-600" role="alert">
+                <span className="font-medium">Succesfully Logged in!</span></div>}
 
             {isError && <p>Unfortunate Error encounterd {error}</p>}
         </form>

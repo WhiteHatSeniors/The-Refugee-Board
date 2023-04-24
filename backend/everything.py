@@ -227,6 +227,7 @@ def logout_user():
 # Getting the user id if logged in
 @app.route("/api/getId", methods=["GET"])
 def get_id():
+    print(session ,session.get("user_id"))
     if not session.get("user_id"):
         return jsonify({"id": None}),200
     return jsonify({"id": session.get("user_id")}),200
@@ -250,7 +251,7 @@ def createNewRefugee():
         return {"error": "All fields have to be filled"},400
     # The HyperText Transfer Protocol (HTTP) 400 Bad Request response status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error 
     if not Age.isnumeric():
-        return {"error": "Age has to be a number"},400
+        return {"error": "Enter a valid age"},400
     
     # if not pycountry.countries.search_fuzzy(CountryOfOrigin):
     # if not pycountry.countries.get(name=CountryOfOrigin):

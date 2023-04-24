@@ -5,6 +5,7 @@ import DataTable from '../components/DataTable';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { useQueryClient, useQuery, QueryClient, useMutation } from "@tanstack/react-query"
 import AxFetch from '../utils/axios';
+import ErrMessage from '../components/ErrMessage';
 
 function Admin() {
     const [isActive, setActive] = useState(false)
@@ -19,6 +20,7 @@ function Admin() {
         if (location.pathname == '/admin') {
             // console.log('HAHAHHAHAHAHAH ', user)
             if (!(user?.CampID) && !(localStorage.getItem("id"))) navigate('/')
+            // else refetch()
         }
     }, [user])
 
@@ -38,15 +40,15 @@ function Admin() {
         const { id } = data.data
         console.log(data, id, "fdfdghffhdhfdhghdfg")
         if (!id) return setUser(null);
-        const refs = await AxFetch.get('api/get/refugees?CampID=' + id)
+        const refs = await AxFetch.get('api/get/refugees?CampID=' + id, { validateStatus: false })
         console.log(refs)
         return refs?.data
     }
 
-    const { status, isFetching, isLoading, error, data: campRefugees } = useQuery(
+    const { status, isFetching, isLoading, error, data: campRefugees, refetch } = useQuery(
         ['camp-refugees'],
         getRefByCampId, {
-        refetchOnMount: false,
+        // refetchOnMount: false,
         refetchOnWindowFocus: false,
         retry: false
     }
@@ -54,7 +56,7 @@ function Admin() {
 
     useEffect(() => {
         console.log(campRefugees)
-        if (status == "success") setCampRefs(campRefugees)
+        // if (status == "success") setCampRefs(campRefugees)
     }, [status, campRefugees?.data])
 
 
@@ -94,7 +96,7 @@ function Admin() {
     const deleteEntry = async (id) => {
 
         // setInfo((prev) => prev.filter(ele => ele.RefugeeID != id))
-        setCampRefs((prev) => prev.filter(ele => ele.RefugeeID != id))
+        // setCampRefs((prev) => prev.filter(ele => ele.RefugeeID != id))
         deleteMutation(id)
 
         // try {
@@ -132,10 +134,12 @@ function Admin() {
                 </div>
                 {/* {JSON.stringify(Data)} */}
                 {
-                    campRefugees && <DataTable data={campRefugees} col={["Name", "Gender", "CountryOfOrigin", "Age", "Message", "MessageDate"]} query={query} deleteEntry={deleteEntry == undefined ? '' : deleteEntry} editEntry={editEntry == undefined ? '' : editEntry} />
+                    !isLoading && !(campRefugees?.error) && <DataTable data={campRefugees} col={["Name", "Gender", "CountryOfOrigin", "Age", "Message", "MessageDate"]} query={query} deleteEntry={deleteEntry == undefined ? '' : deleteEntry} editEntry={editEntry == undefined ? '' : editEntry} />
                 }
                 {
-                    !campRefugees && <h1>No data for now:(</h1>
+                    !isLoading && (campRefugees?.error || campRefugees.length == 0) && <ErrMessage>
+                        {campRefugees?.error ? campRefugees.error : "No refugees found"}
+                    </ErrMessage>
                 }
 
             </div>
