@@ -56,6 +56,8 @@ migrate = Migrate(app, db)
 # migrate = Migrate(app, db) WHYYY?
 
 
+
+
 # Models
 
 # CampDetails
@@ -126,11 +128,11 @@ def createNewCamp():
     # Recieving details of the camp
     camp_details = request.get_json()
 
-    email=camp_details["CampEmail"]
-    password=camp_details["password"]
-    confirmPassword=camp_details["ConfirmPassword"]
-    address=camp_details["CampAddress"]
-    camp_name=camp_details["CampName"]
+    email=camp_details.get("CampEmail")
+    password=camp_details.get("password")
+    confirmPassword=camp_details.get("ConfirmPassword")
+    address=camp_details.get("CampAddress")
+    camp_name=camp_details.get("CampName")
 
     # Checking if the user exists
     user_exists=Camp.query.filter_by(CampEmail=email.strip()).first() is not None
@@ -138,16 +140,21 @@ def createNewCamp():
         return jsonify({"error": "User already exists"}),409
    
         # 409- (Conflict) indicates that the request could not be processed because of conflict in the request
-
-    address_exists=Camp.query.filter_by(CampAddress=address.strip()).first() is not None
-    camp_exists=Camp.query.filter_by(CampName=camp_name.strip()).first() is not None
-    if address_exists and camp_exists:
-        return jsonify({"error": "User already exists"}),409
-    
-    if user_exists:
+    print(address, camp_name)
+    if camp_name:
+        camp_exists=Camp.query.filter_by(CampName=camp_name.strip()).first() is not None
+    else:
+        return jsonify({"error": "Camp name has to be entered"}),401
+    if address:
+        address_exists=Camp.query.filter_by(CampAddress=address.strip()).first() is not None
+    else:
+        return jsonify({"error": "Address has to be entered"}),401
+    if address and camp_name and address_exists and camp_exists:
         return jsonify({"error": "User already exists"}),409
    
     # Validating user password
+    if not password.strip():
+         return jsonify({"error": "Passwords cannot be empty"}),401
     if password != confirmPassword:
         return jsonify({"error": "Passwords not matching"}),401
     if not validate_password(password): # Peek the definition of this function for password constraints
@@ -164,10 +171,10 @@ def createNewCamp():
     hashed_password=bcrypt.generate_password_hash(password)
 
     # Adding it to the database
-    new_camp = Camp(CampEmail=camp_details["CampEmail"],
+    new_camp = Camp(CampEmail=email,
                     password=hashed_password,
-                    CampName=camp_details["CampName"],
-                    CampAddress=camp_details["CampAddress"],
+                    CampName=camp_name,
+                    CampAddress=address,
                 )
     db.session.add(new_camp)
     db.session.commit()

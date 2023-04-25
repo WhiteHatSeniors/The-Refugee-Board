@@ -134,7 +134,7 @@ export default function Login() {
                 disabled={isLoading ? true : false}
                 type="submit"
             >
-                Sign Up
+                {isLoading ? 'Loading...' : 'Sign Up'}
             </button>
             <Link to="/login" className="block">
                 Already registered?{" "}
