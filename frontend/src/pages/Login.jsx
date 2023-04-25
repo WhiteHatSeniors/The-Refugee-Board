@@ -6,6 +6,7 @@ import { signIn, register } from "../utils/auth";
 import { useQuery } from "@tanstack/react-query"
 import { useLogin } from "../Hooks/useLogin";
 import { useQueryClient, useMutation } from "@tanstack/react-query"
+import AxFetch from "../utils/axios";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -17,16 +18,31 @@ export default function Login() {
     const [info, setInfo, user, setUser] = useOutletContext()
     const location = useLocation();
 
+    // useEffect(() => {
+    //     console.log(user)
+    //     if (location.pathname == '/login') {
+    //         console.log('YOOOOOOOOOOOOO')
+    //         console.log(user, JSON.parse(localStorage.getItem("id")))
+    //         if (user?.CampId || JSON.parse(localStorage.getItem("id"))) navigate('/admin')
+    //     }
+    // }, [user])
+
+
     useEffect(() => {
-        console.log(user)
-        if (location.pathname == '/login') {
-            console.log('YOOOOOOOOOOOOO')
-            console.log(user, JSON.parse(localStorage.getItem("id")))
-            if (user?.CampId || JSON.parse(localStorage.getItem("id"))) navigate('/admin')
+
+        async function func() {
+            const data = await AxFetch.get('/api/getId');
+            const { id } = data.data;
+            if (location.pathname == '/login') {
+                console.log('HAHAHHAHAHAHAH ', user, id)
+                if (!(user?.CampID) && id != undefined) navigate('/admin')
+            }
         }
+
+        func()
     }, [user])
 
-    const { mutate: signInMutation, data: userData, error, isError, isLoading } = useMutation({
+    const { mutate: signInMutation, data: userData, error, isError, isLoading, isFetching, status } = useMutation({
         mutationFn: (data) => signIn(data.email, data.password),
         onSuccess: (data) => {
             console.log(data)
@@ -36,11 +52,12 @@ export default function Login() {
                 setUser(data.data)
                 localStorage.setItem("id", JSON.stringify(data.data.CampID))
                 queryClient.setQueryData(['User'], data)
+                setTimeout(() => {
+                    navigate('/admin')
+                }, 1500)
                 setEmail("")
                 setPw("")
-                // setTimeout(() => {
-                //     navigate('/admin')
-                // }, 1500)
+
             }
         },
         onError: (error) => {
@@ -62,7 +79,7 @@ export default function Login() {
     };
 
     console.log("ERRRRR ", error, isError)
-
+    console.log("isLoading ", isLoading, "status", status);
     return (
         <form
             onSubmit={handleSubmit}

@@ -7,6 +7,8 @@ import { useQuery } from "@tanstack/react-query"
 import { useLogin } from "../Hooks/useLogin";
 import { useQueryClient, useMutation } from "@tanstack/react-query"
 import AxFetch from "../utils/axios";
+import SucMessage from "../components/SucMessage";
+import ErrMessage from "../components/ErrMessage";
 
 export default function Login() {
     // const [email, setEmail] = useState("");
@@ -18,12 +20,17 @@ export default function Login() {
     const location = useLocation();
 
     useEffect(() => {
-        console.log(user)
-        if (location.pathname == '/signup') {
-            console.log('YOOOOOOOOOOOOO')
-            console.log(user, JSON.parse(localStorage.getItem("id")))
-            if (user?.CampId) navigate('/admin')
+
+        async function func() {
+            const data = await AxFetch.get('/api/getId');
+            const { id } = data.data;
+            if (location.pathname == '/signup') {
+                console.log('HAHAHHAHAHAHAH ', user, id)
+                if (!(user?.CampID) && id != undefined) navigate('/')
+            }
         }
+
+        func()
     }, [user])
 
     // const signUpFunc = async (signUpData) => {
@@ -71,7 +78,7 @@ export default function Login() {
     return (
         <form
             onSubmit={handleSubmit}
-            className="auth-form rounded-3xl flex-col justify-center items-center text-center mr-auto ml-auto mt-20 px-5 py-8 min-w-[10%] max-w-[30%] bg-gray-300"
+            className="auth-form rounded-3xl flex-col justify-center items-center text-center mr-auto ml-auto my-20 px-5 py-8 min-w-[10%] max-w-[30%] bg-gray-300"
         >
             <h3 className="font-bold text-xl mb-7 text-center">Sign Up</h3>
             {/* <label htmlFor="em">Email</label> */}
@@ -133,12 +140,10 @@ export default function Login() {
                 Already registered?{" "}
                 <span className="underline text-blue-900 hover:text-white">Login</span>
             </Link>
-            {signUpData?.status >= 400 && <div className="p-2 my-4 text-sm text-red-800 rounded-lg bg-red-50 dark:text-red-600" role="alert">
-                <span className="font-medium">{signUpData?.error}</span></div>}
-            {signUpData?.status < 299 && <div className="p-2 my-4 text-sm text-green-800 rounded-lg bg-green-50 dark:text-green-600" role="alert">
-                <span className="font-medium">Succesfully Signed up!</span></div>}
+            {signUpData?.status >= 400 && <ErrMessage>{signUpData?.error}</ErrMessage>}
+            {signUpData?.status < 299 && <SucMessage>Succesfully Signed up!</SucMessage>}
 
-            {isError && <p>Unfortunate Error encounterd {error.response}</p>}
+            {isError && <ErrMessage>Unfortunate Error encounterd {error.response}</ErrMessage>}
         </form>
     );
 }

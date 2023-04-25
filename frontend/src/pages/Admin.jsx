@@ -133,7 +133,7 @@ function Admin() {
             <h1 className='font-bold text-6xl p-10'>The Admin Dashboard</h1>
             <div className='text-center'>
                 <div className='flex-row'>
-                    <button className='bg-green-500 p-1 rounded-xl m-4' onClick={(e) => navigate('/create-entry')}>Create Entry</button>
+                    <button type="button" class=" font-poppins text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" onClick={(e) => navigate('/create-entry')}>Create Entry</button>
                     <input placeholder="Enter name" onChange={event => setQuery(event.target.value)} onClick={event => setActive(prev => !prev)} className={/*isActive ? 'border-black border-2 px-7 py-3 w-[80%]' :*/ 'border-black border-y px-7 py-3 w-[60%]'} />
                     <FcSearch className='text-center inline-block text-4xl ' />
                 </div>
