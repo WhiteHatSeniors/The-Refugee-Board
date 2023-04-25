@@ -421,7 +421,17 @@ def getRefugees():
 
     print("ARGS: ",args)
 
-    if campID:
+    if campID and searchQuery:
+        refugees = Refugee.query.filter(
+            and_(or_(Refugee.Name.like(f"%{searchQuery}%"),
+                 Refugee.camp.has(Camp.CampName.like(f"%{searchQuery}%")),
+                 Refugee.CountryOfOrigin.like(f"%{searchQuery}%"),
+                 Refugee.camp.has(Camp.CampAddress.like(f"%{searchQuery}%")),
+                 Refugee.Age == searchQuery 
+                ),
+                Refugee.CampID==campID
+            )).order_by(Refugee.MessageDate.desc()).all()
+    elif campID:
         refugees = Refugee.query.filter_by(CampID=campID).order_by(Refugee.MessageDate.desc()).all()
     # name, campName, country, campAddress
     else:
