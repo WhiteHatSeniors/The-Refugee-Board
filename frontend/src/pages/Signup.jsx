@@ -78,7 +78,7 @@ export default function Login() {
     return (
         <form
             onSubmit={handleSubmit}
-            className="auth-form rounded-3xl flex-col justify-center items-center text-center mr-auto ml-auto my-20 px-5 py-8 min-w-[10%] max-w-[30%] bg-gray-300"
+            className="auth-form rounded-3xl flex-col justify-center items-center text-center mr-auto ml-auto my-20 px-5 py-8 min-w-[10%] max-w-[30%] bg-gray-300 font-mono"
         >
             <h3 className="font-bold text-xl mb-7 text-center">Sign Up</h3>
             {/* <label htmlFor="em">Email</label> */}

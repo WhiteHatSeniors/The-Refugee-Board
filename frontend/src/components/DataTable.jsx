@@ -27,8 +27,8 @@ const TdData = ({ data, column, deleteEntry, editEntry }) => {
                             return <td className='p-5' key={ind} >{data[v] === "" ? "none" : data[v]}</td>
                         })
                     }
-                    {deleteEntry && <td><button className='bg-red-600 p-1 m-2 rounded-xl' onClick={(e) => deleteEntry(data.RefugeeID)}>Delete</button></td>}
-                    {editEntry && <td><Link to={`/edit-entry/${data.RefugeeID}`} className='bg-green-500 p-1 m-2 rounded-xl' state={data}>edit</Link></td>}
+                    {deleteEntry && <td><button className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-full text-sm px-3 py-2 text-center mr-3 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" onClick={(e) => deleteEntry(data.RefugeeID)}>Delete</button></td>}
+                    {editEntry && <td><Link to={`/edit-entry/${data.RefugeeID}`} className="text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-3 py-2.5 text-center mr-3 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" state={data}>Edit</Link></td>}
                 </tr>
             )
         })

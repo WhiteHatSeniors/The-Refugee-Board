@@ -104,7 +104,7 @@ function CreateEntry() {
 
 
     return (
-        <form onSubmit={subHandler} className='flex-row text-center m-auto'>
+        <form onSubmit={subHandler} className='flex-row text-center m-auto font-mono'>
             <h1 className='font-bold text-5xl p-10 underline mt-7'>Refugee Entry</h1>
             <input type="text" placeholder='Name' onChange={e => setName(e.target.value)} value={name} className='border-black border m-5 w-[50%] block mx-auto' />
             <input type="number" placeholder='Age' onChange={e => setAge(e.target.value)} value={age} className='border-black border m-5 w-[50%] block mx-auto' />

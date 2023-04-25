@@ -7,10 +7,11 @@ function Navbar({ user, setUser }) {
 
     const navigate = useNavigate()
     return (
-        <nav className='bg-yellow-100 flex justify-evenly items-center p-4'>
+        <nav className='bg-yellow-100 flex justify-evenly items-center p-4 font-mono'>
             <Link to='/' className='font-bold text-2xl'>trb<span className='font-extrabold text-4xld'>.</span></Link>
             {user && <Link to='/admin'>Dashboard</Link>}
             <Link to='/about'>About us</Link>
+            <Link to='/contact'>Contact</Link>
             {!user && <Link to='/login'>Login</Link>}
             {user && <Link type='button' onClick={async (e) => {
                 e.preventDefault()
@@ -23,7 +24,6 @@ function Navbar({ user, setUser }) {
                 }
 
             }} >Logout</Link>}
-            <Link to='/contact'>Contact</Link>
         </nav>
     )
 }

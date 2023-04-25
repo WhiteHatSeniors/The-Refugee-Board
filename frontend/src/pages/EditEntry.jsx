@@ -131,7 +131,7 @@ function EditEntry() {
 
 
     return (
-        <form onSubmit={editHandler} className='flex-row m-auto'>
+        <form onSubmit={editHandler} className='flex-row m-auto font-mono'>
 
             <h1 className='font-bold text-5xl p-10 underline mt-7'>Edit Refugee Details</h1>
 
