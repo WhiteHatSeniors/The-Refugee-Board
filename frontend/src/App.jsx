@@ -23,7 +23,7 @@ function App() {
 
 
   const getRefsFn = async () => {
-    const res = await AxFetch.get('api/get/refugees?Name=' + query, { validateStatus: false })
+    const res = await AxFetch.get('/api/get/refugees?SearchQuery=' + query, { validateStatus: false })
     console.log("HULUFDIFDHFHF ", res)
     return res.data;
     // else fetch('api/get/camp?campID=' + id)
@@ -58,7 +58,7 @@ function App() {
       <h1 className='font-bold text-6xl p-10'>The Refugee Board</h1>
       <div className='text-center'>
         <form className='flex-row' onSubmit={subHandler}>
-          <input placeholder="Enter name" onChange={event => setQuery(event.target.value)} onClick={event => setActive(prev => !prev)} className={/*isActive ? 'border-black border-2 px-7 py-3 w-[80%]' :*/ 'border-black border-y px-7 py-3 w-[60%]'} />
+          <input placeholder="Search by Name, Camp, Address, Age and Country..." onChange={event => setQuery(event.target.value)} onClick={event => setActive(prev => !prev)} className={/*isActive ? 'border-black border-2 px-7 py-3 w-[80%]' :*/ 'border-black border px-7 py-3 w-[60%]'} />
           <button type='submit'><FcSearch className='text-center inline-block text-4xl' /></button>
         </form>
         {/* {JSON.stringify(Data)} */}

@@ -15,6 +15,8 @@ function Admin() {
     const queryClient = useQueryClient()
     const navigate = useNavigate()
 
+
+
     useEffect(() => {
 
         async function func() {
@@ -45,7 +47,7 @@ function Admin() {
         const { id } = data.data
         if (!id) setUser(null);
         console.log(data, id, "fdfdghffhdhfdhghdfg")
-        const refs = await AxFetch.get('api/get/refugees?CampID=' + id, { validateStatus: false })
+        const refs = await AxFetch.get(`/api/get/refugees?SearchQuery=${query}&CampID=${id}`, { validateStatus: false })
         console.log(refs)
         return refs?.data
     }
@@ -126,6 +128,11 @@ function Admin() {
     }
 
 
+    const subHandler = (e) => {
+        e.preventDefault()
+        refetch()
+    }
+
     return (
         // <div className="App">
         //   {info && <p>{JSON.stringify(info)}</p>}
@@ -133,11 +140,11 @@ function Admin() {
         <div className='p-10'>
             <h1 className='font-bold font-mono text-6xl p-10'>The Admin Dashboard</h1>
             <div className='text-center'>
-                <div className='flex-row'>
+                <form className='flex-row' onSubmit={subHandler}>
                     <button type="button" className="text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" onClick={(e) => navigate('/create-entry')}>Create Entry</button>
-                    <input placeholder="Enter name" onChange={event => setQuery(event.target.value)} onClick={event => setActive(prev => !prev)} className={/*isActive ? 'border-black border-2 px-7 py-3 w-[80%]' :*/ 'border-black border-y px-7 py-3 w-[60%] font-mono'} />
-                    <FcSearch className='text-center inline-block text-4xl ' />
-                </div>
+                    <input placeholder="Search by Name, Camp, Address, Age and Country..." onChange={event => setQuery(event.target.value)} onClick={event => setActive(prev => !prev)} className={/*isActive ? 'border-black border-2 px-7 py-3 w-[80%]' :*/ 'border-black border px-7 py-3 w-[60%] font-mono'} />
+                    <button type='submit'><FcSearch className='text-center inline-block text-4xl' /></button>
+                </form>
                 {/* {JSON.stringify(Data)} */}
                 {
                     !isLoading && !(campRefugees?.error) && <DataTable data={campRefugees} col={["Name", "Gender", "CountryOfOrigin", "Age", "Message", "MessageDate"]} query={query} deleteEntry={deleteEntry == undefined ? '' : deleteEntry} editEntry={editEntry == undefined ? '' : editEntry} />
