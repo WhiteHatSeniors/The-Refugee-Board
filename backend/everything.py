@@ -415,23 +415,20 @@ def getRefugees():
     # country = args.get("CountryOfOrigin")
     # campName = args.get("CampName")
     campID = args.get("CampID")
+    id= str(session.get("user_id"))
     # name = args.get("Name")
     # campAddress = args.get("CampAddress")
-    searchQuery = args.get("SearchQuery")
+    searchQuery = args.get("SearchQuery").strip()
 
-    print("ARGS: ",args)
-
-    if campID and searchQuery:
+    if campID and searchQuery and (id == campID):
         refugees = Refugee.query.filter(
             and_(or_(Refugee.Name.like(f"%{searchQuery}%"),
-                 Refugee.camp.has(Camp.CampName.like(f"%{searchQuery}%")),
                  Refugee.CountryOfOrigin.like(f"%{searchQuery}%"),
-                 Refugee.camp.has(Camp.CampAddress.like(f"%{searchQuery}%")),
                  Refugee.Age == searchQuery 
                 ),
                 Refugee.CampID==campID
             )).order_by(Refugee.MessageDate.desc()).all()
-    elif campID:
+    elif campID and (id == campID):
         refugees = Refugee.query.filter_by(CampID=campID).order_by(Refugee.MessageDate.desc()).all()
     # name, campName, country, campAddress
     else:
