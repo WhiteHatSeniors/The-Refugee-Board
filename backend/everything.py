@@ -7,7 +7,7 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_
+from sqlalchemy import or_, and_
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from flask_migrate import Migrate 
@@ -407,7 +407,7 @@ def getAllRefugees():
         refugees_list.append(refugee_details)
     return jsonify(refugees_list)
 
-# Getting refugees based on the Name, CountryOfOrigin or CampName
+# Getting refugees based on the search query
 @app.route('/api/get/refugees',methods=["GET"])
 def getRefugees():
     '''NOTE: CampID is given the highest priority. If it is passed, all other arguements are not considered'''
@@ -425,7 +425,14 @@ def getRefugees():
         refugees = Refugee.query.filter_by(CampID=campID).order_by(Refugee.MessageDate.desc()).all()
     # name, campName, country, campAddress
     else:
-        refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{searchQuery}%"),Refugee.camp.has(Camp.CampName.like(f"%{searchQuery}%")),Refugee.CountryOfOrigin.like(f"%{searchQuery}%"),Refugee.camp.has(Camp.CampAddress.like(f"%{searchQuery}%")))).order_by(Refugee.MessageDate.desc()).all()
+        refugees = Refugee.query.filter(
+            or_(Refugee.Name.like(f"%{searchQuery}%"),
+                 Refugee.camp.has(Camp.CampName.like(f"%{searchQuery}%")),
+                 Refugee.CountryOfOrigin.like(f"%{searchQuery}%"),
+                 Refugee.camp.has(Camp.CampAddress.like(f"%{searchQuery}%")),
+                 Refugee.Age == searchQuery 
+            )
+        ).order_by(Refugee.MessageDate.desc()).all()
     # elif name:
     #     if campName:
     #         if country:
