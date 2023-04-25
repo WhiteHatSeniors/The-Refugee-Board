@@ -106,23 +106,23 @@ function CreateEntry() {
     return (
         <form onSubmit={subHandler} className='flex-row text-center m-auto'>
             <h1 className='font-bold text-5xl p-10 underline mt-7'>Refugee Entry</h1>
-            <input type="text" placeholder='Name' onChange={e => setName(e.target.value)} className='border-black border m-5 w-[50%] block mx-auto' />
-            <input type="number" placeholder='Age' onChange={e => setAge(e.target.value)} className='border-black border m-5 w-[50%] block mx-auto' />
-            <input type="text" placeholder='Country of origin' onChange={e => setOrigin(e.target.value)} className='border-black border m-5 w-[50%] block mx-auto' />
-            <textarea placeholder='Message' onChange={e => setMessage(e.target.value)} className='border-black border m-5 w-[50%] block mx-auto' ></textarea>
-            <input type="text" placeholder="Gender" onChange={e => setGender(e.target.value)} className='border-black border m-5 w-[50%] block mx-auto' />
+            <input type="text" placeholder='Name' onChange={e => setName(e.target.value)} value={name} className='border-black border m-5 w-[50%] block mx-auto' />
+            <input type="number" placeholder='Age' onChange={e => setAge(e.target.value)} value={age} className='border-black border m-5 w-[50%] block mx-auto' />
+            <input type="text" placeholder='Country of origin' onChange={e => setOrigin(e.target.value)} value={origin} className='border-black border m-5 w-[50%] block mx-auto' />
+            <textarea placeholder='Message' onChange={e => setMessage(e.target.value)} value={message} className='border-black border m-5 w-[50%] block mx-auto' ></textarea>
+            <input type="text" placeholder="Gender" onChange={e => setGender(e.target.value)} value={gender} className='border-black border m-5 w-[50%] block mx-auto' />
             <button type="submit" className='p-2 rounded-lg bg-yellow-200'>Submit</button>
             {isError && <div className="p-2 my-10 mx-auto w-[60%] text-sm text-red-800 rounded-lg bg-red-100 dark:text-red-700 flex items-center justify-center" role="alert">
                 <span className="font-medium">{mutateError?.response?.data?.error}</span></div>}
             {mutateData && !isError && <SucMessage>Succesfully added!</SucMessage>}
             {/* <p>Please select your favorite Web language:</p> */}
             {/* <input type="radio" id="html" name="fav_language" value="HTML" />
-            <label for="html">HTML</label>
-            <input type="radio" id="css" name="fav_language" value="CSS" />
-            <label for="css">CSS</label>
-            <input type="radio" id="javascript" name="fav_language" value="JavaScript" />
-            <label for="javascript">JavaScript</label>
-            <button type='submit'></button> */}
+        <label for="html">HTML</label>
+        <input type="radio" id="css" name="fav_language" value="CSS" />
+        <label for="css">CSS</label>
+        <input type="radio" id="javascript" name="fav_language" value="JavaScript" />
+        <label for="javascript">JavaScript</label>
+        <button type='submit'></button> */}
         </form>
     )
 }

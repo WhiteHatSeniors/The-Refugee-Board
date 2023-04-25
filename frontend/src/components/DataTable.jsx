@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Pagination from './Pagination';
+import { Link } from 'react-router-dom';
 
 // const col = ["Name", "Gender", "CampName", "CountryOfOrigin", "Age", "Message", "MessageDate"]
 
@@ -27,7 +28,7 @@ const TdData = ({ data, column, deleteEntry, editEntry }) => {
                         })
                     }
                     {deleteEntry && <td><button className='bg-red-600 p-1 m-2 rounded-xl' onClick={(e) => deleteEntry(data.RefugeeID)}>Delete</button></td>}
-                    {editEntry && <td><button className='bg-green-500 p-1 m-2 rounded-xl' onClick={(e) => editEntry(data.RefugeeID)}>edit</button></td>}
+                    {editEntry && <td><Link to={`/edit-entry/${data.RefugeeID}`} className='bg-green-500 p-1 m-2 rounded-xl' state={data}>edit</Link></td>}
                 </tr>
             )
         })

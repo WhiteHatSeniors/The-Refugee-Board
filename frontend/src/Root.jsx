@@ -26,11 +26,14 @@ function Root() {
     const getUserFn = async () => {
         const data = await AxFetch.get('/api/getId');
         const { id } = data.data
+
+        console.log("USERRRRRR ", id)
+
         if (!id) {
             setUser(null);
             return ({ undefined: true })
         }
-        else return AxFetch.get('api/get/camp?campID=' + id)
+        else return AxFetch.get('/api/get/camp?campID=' + id)
         // else fetch('api/get/camp?campID=' + id)
         //     .then(response => response.json())
         //     .then(response => {

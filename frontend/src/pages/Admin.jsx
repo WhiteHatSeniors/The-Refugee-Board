@@ -16,12 +16,17 @@ function Admin() {
     const navigate = useNavigate()
 
     useEffect(() => {
-        // console.log(user, location.pathname)
-        if (location.pathname == '/admin') {
-            // console.log('HAHAHHAHAHAHAH ', user)
-            if (!(user?.CampID) && !(localStorage.getItem("id"))) navigate('/')
-            // else refetch()
+
+        async function func() {
+            const data = await AxFetch.get('/api/getId');
+            const { id } = data.data;
+            if (location.pathname == '/admin') {
+                console.log('HAHAHHAHAHAHAH ', user, id)
+                if (!(user?.CampID) && id == undefined) navigate('/')
+            }
         }
+
+        func()
     }, [user])
 
     // useEffect(() => {
@@ -38,8 +43,8 @@ function Admin() {
     const getRefByCampId = async () => {
         const data = await AxFetch.get('/api/getId');
         const { id } = data.data
+        if (!id) setUser(null);
         console.log(data, id, "fdfdghffhdhfdhghdfg")
-        if (!id) return setUser(null);
         const refs = await AxFetch.get('api/get/refugees?CampID=' + id, { validateStatus: false })
         console.log(refs)
         return refs?.data
@@ -60,9 +65,9 @@ function Admin() {
     }, [status, campRefugees?.data])
 
 
-    const editEntry = (id) => {
+    const editEntry = (data) => {
         // fetch('http://127.0.0.1:5000/api/update/refugee')
-        console.log('Editing ' + id)
+        console.log('Editing ', data)
     }
 
     const deleteHelperFn = async (refId) => {
@@ -137,7 +142,7 @@ function Admin() {
                     !isLoading && !(campRefugees?.error) && <DataTable data={campRefugees} col={["Name", "Gender", "CountryOfOrigin", "Age", "Message", "MessageDate"]} query={query} deleteEntry={deleteEntry == undefined ? '' : deleteEntry} editEntry={editEntry == undefined ? '' : editEntry} />
                 }
                 {
-                    !isLoading && (campRefugees?.error || campRefugees.length == 0) && <ErrMessage>
+                    !isLoading && (campRefugees?.error || campRefugees?.length == 0) && <ErrMessage>
                         {campRefugees?.error ? campRefugees.error : "No refugees found"}
                     </ErrMessage>
                 }

@@ -115,6 +115,10 @@ def validate_password(password):
         return False  
     return True  
   
+# https://stackoverflow.com/questions/62614933/flask-session-cookie-expiration
+@app.before_request
+def before_request():
+    session.permanent = True
 
 # Creating a new camp -  Sign Up
 @app.route('/api/register',methods=["POST"])
@@ -485,7 +489,6 @@ def getCamp():
     # Getting the campID or campName from the request
     args = request.args
     campID = args.get("campID")
-
     if campID is None:
         # Find camp by its name
         campName = args.get("campName")
@@ -545,22 +548,35 @@ def addAllRefugees():
     return jsonify(refugees)
 
 # Updating a refugees details
-@app.route('/api/patch/refugee',methods=["PATCH"])
-def updateRefugee():
+@app.route('/api/patch/refugee/<id>',methods=["PATCH"])
+def updateRefugee(id):
 
     # You need to be logged in to update a refugee entry
-    # if not session.get("user_id"):
-    #     return jsonify({"error": "Not logged in"}), 403
+    if not session.get("user_id"):
+        return jsonify({"error": "Not logged in"}), 403
+    
+    # The HTTP 403 Forbidden response status code indicates that the server understands the request but refuses to authorize it
     
     # Recieving details of the refugee
     updatedDetails = request.get_json() # Expecting a JSON object with the RefugeeID and ALL the updated details.
-    refugee = Refugee.query.get_or_404(updatedDetails["RefugeeID"]) # Automatically sends a 404 if not found
-
+    # refugee = Refugee.query.filter_by(RefugeeID=id).first() # Automatically sends a 404 if not found
+    # refugee = Refugee.query.get_or_404(updatedDetails["RefugeeID"]) # Automatically sends a 404 if not found
+    refugee = Refugee.query.get_or_404(id) # Automatically sends a 404 if not found
+    print('UPDATE ', refugee)
+    
     # Checking if the logged in camp representative is allowed to update the refugee
     # Checking if the refugee belongs to the same camp as the logged in camp representative.
-    # if refugee.CampID != session.get("user_id"):
-    #     return jsonify({"error": "You are not allowed to update this refugee"}), 403
-    
+    if refugee.CampID != session.get("user_id"):
+        return jsonify({"error": "You are not allowed to update this refugee"}), 403
+
+    Name, Age ,Gender, CountryOfOrigin,Message= updatedDetails['Name'] and updatedDetails['Name'].strip(),updatedDetails['Age'] and str(updatedDetails['Age']).strip(), updatedDetails['Gender'] and updatedDetails['Gender'].strip(),updatedDetails['CountryOfOrigin'] and updatedDetails['CountryOfOrigin'].strip(),updatedDetails['Message'] and updatedDetails['Message'].strip()
+
+    if not(Name and Age and Gender and CountryOfOrigin and Message):
+        return {"error": "All fields have to be filled"},400
+    # The HyperText Transfer Protocol (HTTP) 400 Bad Request response status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error 
+    if not Age.isnumeric():
+        return {"error": "Enter a valid age"},400
+
     if request.method == 'PATCH':
         # Updating the refugee
         refugee.Name = updatedDetails['Name']
@@ -573,7 +589,7 @@ def updateRefugee():
         db.session.add(refugee) # SQL Alchemy will update if it exists.
         db.session.commit()
 
-        return jsonify(updatedDetails),200
+        return jsonify({"data": refugee}),200
     else:
         # Some other method was used
         return jsonify({"error": "Method not allowed"}),405

@@ -16,6 +16,7 @@ import CreateEntry from './pages/CreateEntry';
 import Root from './Root';
 import RootWrapper from './RootWrapper';
 import Signup from "./pages/Signup"
+import EditEntry from './pages/EditEntry';
 // import { AuthContextProvider } from './Hooks/AuthContext';
 
 
@@ -52,6 +53,9 @@ const router = createBrowserRouter([
       {
         path: "create-entry",
         element: <CreateEntry />,
+      }, {
+        path: "edit-entry/:id",
+        element: <EditEntry />,
       },
     ],
   },
