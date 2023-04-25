@@ -15,7 +15,7 @@ from datetime import datetime
 from dataclasses import dataclass
 from validate_email import validate_email  
 from flask_session import Session #server side session
-import pycountry
+# import pycountry
 
 #Note: USE THIS ONLY WHEN return jsonify isnt working. Use this as custom encoder with json.dumps()
 # import json
@@ -410,51 +410,69 @@ def getAllRefugees():
 # Getting refugees based on the Name, CountryOfOrigin or CampName
 @app.route('/api/get/refugees',methods=["GET"])
 def getRefugees():
+    '''NOTE: CampID is given the highest priority. If it is passed, all other arguements are not considered'''
     args = request.args
-    country = args.get("CountryOfOrigin")
-    campName = args.get("CampName")
+    # country = args.get("CountryOfOrigin")
+    # campName = args.get("CampName")
     campID = args.get("CampID")
-    name = args.get("Name")
+    # name = args.get("Name")
+    # campAddress = args.get("CampAddress")
+    searchQuery = args.get("SearchQuery")
 
     print("ARGS: ",args)
 
     if campID:
         refugees = Refugee.query.filter_by(CampID=campID).order_by(Refugee.MessageDate.desc()).all()
-        print(refugees)
-    if name is None and campID is None:
-        if country is None and campName is None:
-            return jsonify({"error": "No parameters were given"}),400
-        elif country is None:
-            # Find refugees from a single camp
-
-            # Getting refugees by campname(exact match)
-            # refugees=Refugee.query.filter(Refugee.camp.has(Camp.CampName == campName)).order_by(Refugee.MessageDate.desc()).all() 
-
-            # Getting refugees by campname(specified pattern in a column)(all matches)
-            refugees=Refugee.query.filter(Refugee.camp.has(Camp.CampName.like(f"%{campName}%"))).order_by(Refugee.MessageDate.desc()).all()
-
-            # Reference : https://stackoverflow.com/questions/34804756/sqlalchemy-filter-many-to-one-relationship-where-the-one-object-has-a-list-cont
-        elif campName is None:
-            # Find refugees from a single country
-            refugees = Refugee.query.filter_by(CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
-        else:
-            # Find refugees from a single camp and country
-            # refugees = Refugee.query.filter_by(CampName=campName,CountryOfOrigin=country).order_by(Refugee.MessageDate.desc()).all()
-            refugees = Refugee.query.filter(Refugee.camp.has(Camp.CampName.like(f"%{campName}%")),Refugee.CountryOfOrigin==country).order_by(Refugee.MessageDate.desc()).all()
-    elif campID is None:
-        if country is None and campName is None:
-            # Find refugees LIKE name
-            refugees = Refugee.query.filter(Refugee.Name.like(f"%{name}%")).order_by(Refugee.MessageDate.desc()).all()
-            print("REFS: ", refugees)
-        elif country is None:
-            # Find refugees with LIKE name from a single camp
-            refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.camp.has(Camp.CampName.like(f"%{campName}%")))).order_by(Refugee.MessageDate.desc()).all()
-        elif campName is None:
-            # Find refugees with LIKE name from a single country
-            refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.CountryOfOrigin==country)).order_by(Refugee.MessageDate.desc()).all()
-        else:
-            # Find refugees with a LIKE name from a single camp and country
-            refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.camp.has(Camp.CampName.like(f"%{campName}%")),Refugee.CountryOfOrigin==country)).order_by(Refugee.MessageDate.desc()).all()
+    # name, campName, country, campAddress
+    else:
+        refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{searchQuery}%"),Refugee.camp.has(Camp.CampName.like(f"%{searchQuery}%")),Refugee.CountryOfOrigin.like(f"%{searchQuery}%"),Refugee.camp.has(Camp.CampAddress.like(f"%{searchQuery}%")))).order_by(Refugee.MessageDate.desc()).all()
+    # elif name:
+    #     if campName:
+    #         if country:
+    #             if campAddress:
+    #                 refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.camp.has(Camp.CampName.like(f"%{campName}%")),Refugee.CountryOfOrigin==country,Refugee.camp.has(Camp.CampAddress.like(f"%{campAddress}%")))).order_by(Refugee.MessageDate.desc()).all()
+    #             else:
+    #                 refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.camp.has(Camp.CampName.like(f"%{campName}%")),Refugee.CountryOfOrigin==country)).order_by(Refugee.MessageDate.desc()).all()
+    #         else:
+    #             if campAddress:
+    #                 refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.camp.has(Camp.CampName.like(f"%{campName}%")),Refugee.camp.has(Camp.CampAddress.like(f"%{campAddress}%")))).order_by(Refugee.MessageDate.desc()).all()
+    #             else:
+    #                 refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.camp.has(Camp.CampName.like(f"%{campName}%")))).order_by(Refugee.MessageDate.desc()).all()
+    #     else:
+    #         if country:
+    #             if campAddress:
+    #                 refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.CountryOfOrigin==country,Refugee.camp.has(Camp.CampAddress.like(f"%{campAddress}%")))).order_by(Refugee.MessageDate.desc()).all()
+    #             else:
+    #                 refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.CountryOfOrigin==country)).order_by(Refugee.MessageDate.desc()).all()
+    #         else:
+    #             if campAddress:
+    #                 refugees = Refugee.query.filter(and_(Refugee.Name.like(f"%{name}%"),Refugee.camp.has(Camp.CampAddress.like(f"%{campAddress}%")))).order_by(Refugee.MessageDate.desc()).all()
+    #             else:
+    #                 refugees = Refugee.query.filter(Refugee.Name.like(f"%{name}%")).order_by(Refugee.MessageDate.desc()).all()
+    # else:
+        # if campName:
+        #     if country:
+        #         if campAddress:
+        #             refugees = Refugee.query.filter(and_(Refugee.camp.has(Camp.CampName.like(f"%{campName}%")),Refugee.CountryOfOrigin==country,Refugee.camp.has(Camp.CampAddress.like(f"%{campAddress}%")))).order_by(Refugee.MessageDate.desc()).all()
+        #         else:
+        #             refugees = Refugee.query.filter(and_(Refugee.camp.has(Camp.CampName.like(f"%{campName}%")),Refugee.CountryOfOrigin==country)).order_by(Refugee.MessageDate.desc()).all()
+        #     else:
+        #         if campAddress:
+        #             refugees = Refugee.query.filter(and_(Refugee.camp.has(Camp.CampName.like(f"%{campName}%")),Refugee.camp.has(Camp.CampAddress.like(f"%{campAddress}%")))).order_by(Refugee.MessageDate.desc()).all()
+        #         else:
+        #             refugees = Refugee.query.filter(Refugee.camp.has(Camp.CampName.like(f"%{campName}%"))).order_by(Refugee.MessageDate.desc()).all()
+        # else:
+        #     if country:
+        #         if campAddress:
+        #             refugees = Refugee.query.filter(and_(Refugee.CountryOfOrigin==country,Refugee.camp.has(Camp.CampAddress.like(f"%{campAddress}%")))).order_by(Refugee.MessageDate.desc()).all()
+        #         else:
+        #             refugees = Refugee.query.filter(Refugee.CountryOfOrigin==country).order_by(Refugee.MessageDate.desc()).all()
+        #     else:
+        #         if campAddress:
+        #             refugees = Refugee.query.filter(Refugee.camp.has(Camp.CampAddress.like(f"%{campAddress}%"))).order_by(Refugee.MessageDate.desc()).all()
+        #         else:
+        #             refugees = Refugee.query.all()
+    
     # Checking if no refugees were found
     if len(refugees) == 0:
         print("LLOOLOLOL" ,refugees)
