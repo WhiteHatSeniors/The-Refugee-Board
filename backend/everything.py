@@ -236,7 +236,7 @@ def verifyCamp(id):
     camp = Camp.query.get_or_404(id) # Automatically sends a 404 if not found
 
     # Setting the camp as verified
-    camp.Verified = True
+    camp.verified = True
 
     # Committing the changes to the database
     db.session.add(camp)
