@@ -319,7 +319,6 @@ def createNewRefugee():
     # if not pycountry.countries.get(name=CountryOfOrigin):
     #     return {"error": "Country Not Found"},400
 
-
     # Creating a new refugee object
     print("Ref details: ",refugee_details)
     id=session.get("user_id");
@@ -335,7 +334,10 @@ def createNewRefugee():
                             # CampAddress=logged_in_camp.CampAddress
                             )
     db.session.add(new_refugee)
-    # print(new_refugee.MessageDate)
+    
+    # logged_in_camp.NumberOfRefugees=logged_in_camp.NumberOfRefugees+1
+    logged_in_camp.NumberOfRefugees=Camp.NumberOfRefugees+1
+    
     db.session.commit()
     ref_info={
             'CampID' : id,
@@ -383,6 +385,9 @@ def deleteRefugee(id):
         "Message": ref.Message,
         "MessageDate": ref.MessageDate
     }
+    logged_in_camp=Camp.query.filter_by(CampID=session.get("user_id")).first()
+
+    logged_in_camp.NumberOfRefugees=Camp.NumberOfRefugees-1
     db.session.commit()
     return jsonify({
         "data": ref
@@ -699,7 +704,7 @@ def updateRefugee(id):
     
     # Recieving details of the refugee
     updatedDetails = request.get_json() # Expecting a JSON object with the RefugeeID and ALL the updated details.
-    # refugee = Refugee.query.filter_by(RefugeeID=id).first() # Automatically sends a 404 if not found
+    # refugee = Refugee.query.filter_by(RefugeeID=id).first() 
     # refugee = Refugee.query.get_or_404(updatedDetails["RefugeeID"]) # Automatically sends a 404 if not found
     refugee = Refugee.query.get_or_404(id) # Automatically sends a 404 if not found
     print('UPDATE ', refugee)

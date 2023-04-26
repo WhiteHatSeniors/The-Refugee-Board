@@ -34,7 +34,7 @@ function App() {
     //     }).catch(error => console.log(error))
   }
 
-  const { data: refsInfo, status, error, isFetching, refetch } = useQuery(["info"], getRefsFn, {
+  const { data: refsInfo, status, error, isLoading, refetch } = useQuery(["info"], getRefsFn, {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     retry: false,
@@ -62,6 +62,9 @@ function App() {
           <button type='submit'><FcSearch className='text-center inline-block text-4xl' /></button>
         </form>
         {/* {JSON.stringify(Data)} */}
+        {
+          !isLoading && !(refsInfo?.error) && refsInfo?.length > 0 && <p className='bg-yellow-200 text-black w-[50%] px-3 py-2 mx-auto rounded-lg mt-6 font-mono'>Number of Refugees: {refsInfo.length}</p>
+        }
         {!(refsInfo?.error) && <DataTable data={refsInfo} query={query} col={["Name", "Gender", "CampName", "CampAddress", "CountryOfOrigin", "Age", "Message", "MessageDate"]} deleteEntry={undefined} editEntry={undefined} />}
         {refsInfo?.error && <div className="p-2 my-10 mx-auto w-[60%] text-sm text-red-800 rounded-lg bg-red-100 dark:text-red-700 flex items-center justify-center" role="alert">
           <span className="font-medium">{refsInfo?.error}</span></div>}
