@@ -25,23 +25,24 @@ function Navbar({ user, setUser }) {
                 }
 
             }} >Logout</Link>}
-            {user && <button className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5  dark:bg-green-600 dark:hover:bg-green-700 m-0" type='button' onClick={async (e) => {
-                e.preventDefault()
-            }} >Edit Profile</button>}
-            {user && <Link className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 m-0" type='button' onClick={async (e) => {
-                e.preventDefault()
-                try {
-                    const con = confirm("Do you want to delete the camp?")
-                    if (con) {
-                        await deleteAcc();
-                        setUser(null)
-                        navigate('/')
+            <div>
+                {user && <Link to='/edit-profile' className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5  dark:bg-green-600 dark:hover:bg-green-700 mx-3" type='button' state={user} >Edit Profile</Link>}
+                {user && <Link className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 mx-3" type='button' onClick={async (e) => {
+                    // e.preventDefault()
+                    try {
+                        const con = confirm("Do you want to delete the camp?")
+                        if (con) {
+                            await deleteAcc();
+                            setUser(null)
+                            navigate('/')
+                        }
+                    } catch (err) {
+                        console.log(err)
                     }
-                } catch (err) {
-                    console.log(err)
-                }
 
-            }} >Delete Camp</Link>}
+                }} >Delete Camp</Link>}
+            </div>
+
 
         </nav>
     )

@@ -5,7 +5,7 @@ import AxFetch from '../utils/axios';
 import SucMessage from '../components/SucMessage';
 import ErrMessage from '../components/ErrMessage';
 
-function EditEntry() {
+function EditProfile() {
     const { state } = useLocation();
     console.log(state)
     const [age, setAge] = useState("")
@@ -18,8 +18,9 @@ function EditEntry() {
     const location = useLocation();
     const navigate = useNavigate()
     const queryClient = useQueryClient()
-    const { id: pathId } = useParams();
+    // const { id: pathId } = useParams();
 
+    console.log(state, state?.user)
 
     useEffect(() => {
 
@@ -29,11 +30,11 @@ function EditEntry() {
             console.log("STATE ", state)
             const data = await AxFetch.get('/api/getId');
             const { id } = data.data;
-            if (location.pathname == '/edit-entry/' + pathId) {
+            if (location.pathname == '/edit-profile/') {
                 console.log('HAHAHHAHAHAHAH ', user)
                 console.log(state, localStorage.getItem('id'))
                 if (!(user?.CampID) && !localStorage.getItem('id')) navigate('/')
-                else if (!(state?.CampID) || (state?.CampID != id)) navigate('/admin')
+                else if (user?.CampID != id) navigate('/admin')
                 setName(state?.Name)
                 setAge(state?.Age)
                 setGender(state?.Gender)
@@ -74,21 +75,6 @@ function EditEntry() {
                         navigate('/admin')
                     }, 2000)
                 }
-                // navigate('/');
-                // console.log(queryClient.setQueryData(["camp-refugees"]))
-                // const prevData = queryClient.getQueryData(['camp-refugees'])
-                // console.log(prevData)
-                // // console.log([...prevData, data?.data?.data])
-                // // queryClient.setQueryData(['camp-refugees'], [data?.data?.data, ...prevData])
-                // if (!(data?.error)) {
-                //     queryClient.setQueryData(['camp-refugees'], (prev) => {
-                //         console.log(prev)
-                //         prev.error ? prev = [data?.data?.data] : prev.unshift(data?.data?.data)
-                //         return prev
-                //     })
-                //     setInfo(prev => [data?.data?.data, ...prev])
-                //     setCampRefs([data?.data?.data, ...prevData])
-                // }
             },
             onError: (error) => {
                 console.log(error.response.data.error)
@@ -97,35 +83,12 @@ function EditEntry() {
 
     const editHandler = async (e) => {
         e.preventDefault()
-        // setInfo()
-        // setCampRefs((prev) => prev.filter(ele => ele.RefugeeID != id))
         await editMutation({
             Age: age, Name: name, Gender: gender, CountryOfOrigin: origin, Message: message
         })
         console.log("DATA ", editData)
         console.log("isErr ", isError)
         console.log("ERR ", editError)
-
-
-        //----------------------------------------
-        // try {
-        //     e.preventDefault()
-        //     const refInfo = {
-        //         Age: age, Name: name, Gender: gender, CountryOfOrigin: origin, Message: message
-        //     }
-        //     console.log(info)
-        //     const res = await fetch("/api/post/refugee", {
-        //         method: "POST",
-        //         headers: {
-        //             "Content-type": "application/json",
-        //         },
-        //         body: JSON.stringify(refInfo),
-        //     })
-        //     const data = await res.json();
-        //     setInfo([...info, refInfo])
-        // } catch (err) {
-        //     console.log(err)
-        // }
 
     }
 
@@ -168,4 +131,4 @@ function EditEntry() {
     )
 }
 
-export default EditEntry
+export default EditProfile
