@@ -15,6 +15,9 @@ from datetime import datetime
 from dataclasses import dataclass
 from validate_email import validate_email  
 from flask_session import Session #server side session
+import smtplib, ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 # import pycountry
 
 #Note: USE THIS ONLY WHEN return jsonify isnt working. Use this as custom encoder with json.dumps()
@@ -141,16 +144,14 @@ def createNewCamp():
    
         # 409- (Conflict) indicates that the request could not be processed because of conflict in the request
     print(address, camp_name)
-    if camp_name:
-        camp_exists=Camp.query.filter_by(CampName=camp_name.strip()).first() is not None
-    else:
+    if not camp_name and not camp_name.strip():
         return jsonify({"error": "Camp name has to be entered"}),401
-    if address:
-        address_exists=Camp.query.filter_by(CampAddress=address.strip()).first() is not None
-    else:
+    elif not address and not address.strip():
         return jsonify({"error": "Address has to be entered"}),401
-    if address and camp_name and address_exists and camp_exists:
-        return jsonify({"error": "User already exists"}),409
+    if address and camp_name:
+        address_name_exists=Camp.query.filter_by(CampAddress=address.strip(), CampName=camp_name.strip()).first() is not None
+        if address_name_exists:
+            return jsonify({"error": "User already exists"}),409
    
     # Validating user password
     if not password.strip():
@@ -178,6 +179,56 @@ def createNewCamp():
                 )
     db.session.add(new_camp)
     db.session.commit()
+
+    # ------------------------------------
+
+    # Sending a mail to the registered user
+    port = 587  # For starttls
+    smtp_server = "smtp.gmail.com"
+    sender_email = os.environ.get("EMAIL")
+    receiver_email = email
+    password = os.environ.get("APP_PASSWORD")
+
+    # Option 1: Plain text
+    subject = "You're registered. @therefugeeboard"
+    body = "Your registeration was accepted!\nLogin here http://localhost:3000/login to get started with your entries"
+    # message = "Subject:" + subject + "\n" + body
+
+    
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "You're registered. @therefugeeboard"
+    message["From"] = sender_email
+    message["To"] = receiver_email
+
+    # Create the plain-text and HTML version of your message
+    text = "Subject:" + subject + "\n" + body
+    html = """<html>
+    <body>
+        <h2>Your registeration was accepted!</h2>
+        <p><em><a href="http://localhost:3000/login">Login here</a></em> to get started with your entries</p>
+    </body>
+    </html>
+    """
+
+    # Turn these into plain/html MIMEText objects
+    # The second part is always rendered frist so the html part is part 2
+    part1 = MIMEText(text, "plain")
+    part2 = MIMEText(html, "html")
+
+    # Add HTML/plain-text parts to MIMEMultipart message
+    # The email client will try to render the last part first
+    message.attach(part1)
+    message.attach(part2)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP(smtp_server, port) as server:
+        server.ehlo() 
+        server.starttls(context=context)
+        server.ehlo() 
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message.as_string())
+
+    # ------------------------------------
 
     # No need of Custom JSON encoder for this
     return jsonify({
@@ -340,7 +391,7 @@ def deleteRefugee(id):
 
 # Deleting a camp -> Deleting an account
 @app.route('/api/delete/camp/<id>',methods=["DELETE"])
-def deleteCamp():
+def deleteCamp(id):
     # Getting the camp object from the database
     camp_to_delete = Camp.query.filter_by(CampID=id).first()
 
@@ -350,7 +401,6 @@ def deleteCamp():
     
     camp_details = {
             "CampID": camp_to_delete.CampID,
-            "AdminName": camp_to_delete.AdminName,
             "CampName": camp_to_delete.CampName,
             "CampAddress": camp_to_delete.CampAddress,
             "NumberOfRefugees": camp_to_delete.NumberOfRefugees,
@@ -358,6 +408,57 @@ def deleteCamp():
     }
     db.session.delete(camp_to_delete)
     db.session.commit()
+
+    # ------------------------------------
+
+    # Sending a mail to the registered user
+    port = 587  # For starttls
+    smtp_server = "smtp.gmail.com"
+    sender_email = os.environ.get("EMAIL")
+    receiver_email = camp_to_delete.CampEmail
+    password = os.environ.get("APP_PASSWORD")
+
+    # Option 1: Plain text
+    subject = "Camp deleted. @therefugeeboard"
+    body = "Your camp was deleted.\Register here http://localhost:3000/signup to create a camp"
+    # message = "Subject:" + subject + "\n" + body
+
+    
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "Camp deleted. @therefugeeboard"
+    message["From"] = sender_email
+    message["To"] = receiver_email
+
+    # Create the plain-text and HTML version of your message
+    text = "Subject:" + subject + "\n" + body
+    html = """<html>
+    <body>
+        <h2>Your camp was deleted.</h2>
+        <p><em><a href="http://localhost:3000/signup">Register here</a></em> to create a camp</p>
+    </body>
+    </html>
+    """
+
+    # Turn these into plain/html MIMEText objects
+    # The second part is always rendered frist so the html part is part 2
+    part1 = MIMEText(text, "plain")
+    part2 = MIMEText(html, "html")
+
+    # Add HTML/plain-text parts to MIMEMultipart message
+    # The email client will try to render the last part first
+    message.attach(part1)
+    message.attach(part2)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP(smtp_server, port) as server:
+        server.ehlo() 
+        server.starttls(context=context)
+        server.ehlo() 
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message.as_string())
+
+    # ------------------------------------
+    session.pop("user_id")
     return jsonify(camp_to_delete),204
 
 # Getting all the camps

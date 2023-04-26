@@ -140,8 +140,8 @@ export default function Login() {
                 Not yet registered?{" "}
                 <span className="underline text-blue-900 hover:text-white">Signup</span>
             </Link>
-            {userData?.status >= 400 && <SucMessage>{userData?.error}</SucMessage>}
-            {userData?.status < 299 && <ErrMessage>Succesfully Logged in!</ErrMessage>}
+            {userData?.status >= 400 && <ErrMessage>{userData?.error}</ErrMessage>}
+            {userData?.status < 299 && <SucMessage>Succesfully Logged in!</SucMessage>}
 
             {isError && <p>Unfortunate Error encounterd {error}</p>}
         </form>
