@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate, useOutlet, useOutletContext, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useOutlet, useOutletContext, useParams } from 'react-router-dom'
 import { useQueryClient, useQuery, QueryClient, useMutation } from "@tanstack/react-query"
 import AxFetch from '../utils/axios';
 import SucMessage from '../components/SucMessage';
 import ErrMessage from '../components/ErrMessage';
 
-function EditProfile() {
+function ChangePw() {
     const { state } = useLocation();
     console.log(state)
-    const [campAddress, setCampAddress] = useState("")
-    const [name, setName] = useState("")
+    const [pw, setPw] = useState("")
+    const [cpw, setCpw] = useState("")
     const [info, setInfo, user, setUser, campRefs, setCampRefs] = useOutletContext()
+
     const location = useLocation();
     const navigate = useNavigate()
     const queryClient = useQueryClient()
@@ -25,19 +26,17 @@ function EditProfile() {
             console.log("STATE ", state)
             const data = await AxFetch.get('/api/getId');
             const { id } = data.data;
-            if (location.pathname == '/edit-profile') {
+            if (location.pathname == '/change-password') {
                 console.log('HAHAHHAHAHAHAH ', user)
-                console.log(state, localStorage.getItem('id'))
+                console.log(state, localStorage.getItem('id'), user?.CampID == id)
                 if (!(user?.CampID) && !localStorage.getItem('id')) navigate('/')
                 else if (user?.CampID != id) navigate('/admin')
-                setName(user?.CampName)
-                setCampAddress(user?.CampAddress)
             }
         }
 
         func()
 
-    }, [user])
+    }, [user?.CampID])
 
 
 
@@ -50,7 +49,7 @@ function EditProfile() {
         else return AxFetch.patch(`/api/patch/camp`, refData)
     }
 
-    const { mutate: editMutation, data: editData, error: editError, isError } = useMutation(
+    const { mutate: editMutation, data: editData, error: editError, isError, isLoading } = useMutation(
         editHelperFn, //mutationFn
         {
             // onMutate: async () => {
@@ -64,7 +63,7 @@ function EditProfile() {
                     console.log(user)
                     setUser(data.data.data)
                     setTimeout(() => {
-                        navigate('/admin')
+                        navigate('/login')
                     }, 2000)
                 }
             },
@@ -76,7 +75,7 @@ function EditProfile() {
     const editHandler = async (e) => {
         e.preventDefault()
         await editMutation({
-            CampName: name, CampAddress: campAddress
+            password: pw, ConfirmPassword: cpw
         })
         console.log("DATA ", editData)
         console.log("isErr ", isError)
@@ -86,30 +85,26 @@ function EditProfile() {
 
 
     return (
-        <form onSubmit={editHandler} className='flex-row m-auto font-mono'>
+        <form onSubmit={editHandler} className='flex-row m-auto font-mono' autoComplete="off">
 
-            <h1 className='font-bold text-5xl p-10 underline mt-7'>Edit Camp Details</h1>
+            <h1 className='font-bold text-5xl p-10 underline mt-7'>Change Password</h1>
+            {/* <label> */}
+            {/* <p className='w-[50%] mx-auto text-start mb-0'>Password</p> */}
+            <input type="password" placeholder='New Password' onChange={e => setPw(e.target.value)} value={pw} className='border-black 
+            border mb-5 mt-2 w-[50%] block mx-auto' autoComplete="new-password" />
+            {/* </label> */}
 
-            {user?.CampEmail && <p className='mx-auto w-[50%] text-start my-6'><span className='underline'>Camp Email:</span>  {user?.CampEmail}</p>}
-            {!(isNaN(user?.NumberOfRefugees)) && <p className='mx-auto w-[50%] text-start my-6'><span className='underline'>Number of Refugees:</span>  {user?.NumberOfRefugees}</p>}
-            {user?.created_at && <p className='mx-auto w-[50%] text-start my-6'><span className='underline'>Created at: </span>  {user?.created_at}</p>}
+            {/* <label> */}
+            {/* <p className='w-[50%] mx-auto text-start mb-0'>Confirm Password</p> */}
+            <input type="password" placeholder='Confirm Password' onChange={e => setCpw(e.target.value)} value={cpw} className='border-black border mb-5 mt-2 w-[50%] block mx-auto' />
+            {/* </label> */}
 
-            <label>
-                <p className='w-[50%] mx-auto text-start mb-0'>Name</p>
-                <input type="text" placeholder='Name' onChange={e => setName(e.target.value)} value={name} className='border-black 
-            border mb-5 mt-2 w-[50%] block mx-auto' />
-            </label>
-
-            <label>
-                <p className='w-[50%] mx-auto text-start mb-0'>Camp Address</p>
-                <input type="text" placeholder='Camp Address' onChange={e => setCampAddress(e.target.value)} value={campAddress} className='border-black border mb-5 mt-2 w-[50%] block mx-auto' />
-            </label>
-            <button type="submit" className='py-2 px-4 mt-4 rounded-lg bg-yellow-200 hover:bg-yellow-300'>Edit</button>
+            <p className='text-gray-600 text-sm mb-10'>Note: You'll be logged out on password change as part of our security measures</p>
+            <button type="submit" className='py-2 px-4 mt-2 rounded-lg bg-yellow-200 hover:bg-yellow-300'>{isLoading ? "Loading.." : "Edit"}</button>
             {isError && <ErrMessage>{editError?.response?.data?.error}</ErrMessage>}
-            <Link to='/change-password' className='underline block text-blue-700 my-5'>Change Password</Link>
-            {editData && !isError && <SucMessage>Succesfully edited!</SucMessage>}
+            {editData && !isError && <SucMessage>Password changed! Logging out..</SucMessage>}
         </form>
     )
 }
 
-export default EditProfile
+export default ChangePw

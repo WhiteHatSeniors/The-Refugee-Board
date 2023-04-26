@@ -7,6 +7,10 @@ import { useQueryClient, useQuery, QueryClient, useMutation } from "@tanstack/re
 import AxFetch from '../utils/axios';
 import ErrMessage from '../components/ErrMessage';
 
+// For Future Use:
+// import { ToastContainer, toast } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
+
 function Admin() {
     const [isActive, setActive] = useState(false)
     const [query, setQuery] = useState("")
@@ -14,8 +18,6 @@ function Admin() {
     const location = useLocation();
     const queryClient = useQueryClient()
     const navigate = useNavigate()
-
-
 
     useEffect(() => {
 

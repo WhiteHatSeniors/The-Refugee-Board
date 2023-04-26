@@ -18,6 +18,7 @@ from flask_session import Session #server side session
 import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from flask_mail import Message,Mail
 # import pycountry
 
 #Note: USE THIS ONLY WHEN return jsonify isnt working. Use this as custom encoder with json.dumps()
@@ -56,9 +57,15 @@ server_session=Session(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get("EMAIL")
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get("EMAIL")
+app.config['MAIL_PASSWORD'] = os.environ.get("APP_PASSWORD")
+mail = Mail(app)
+
 # migrate = Migrate(app, db) WHYYY?
-
-
 
 
 # Models
@@ -114,6 +121,7 @@ def validate_password(password):
     # At least 1 number or digit between [0-9].
     # At least 1 character from [ _ or @ or $ ]. 
 
+    #\s- Returns a match where the string contains a white space character
     if len(password) < 8 or re.search("\s" , password):  
         return False  
     if not (re.search("[a-z]", password) and re.search("[A-Z]", password) and re.search("[0-9]", password) ):
@@ -182,25 +190,11 @@ def createNewCamp():
 
     # ------------------------------------
 
-    # Sending a mail to the registered user
-    port = 587  # For starttls
-    smtp_server = "smtp.gmail.com"
-    sender_email = os.environ.get("EMAIL")
-    receiver_email = email
-    password = os.environ.get("APP_PASSWORD")
-
     # Option 1: Plain text
     subject = "You're registered. @therefugeeboard"
     body = "Your registeration was accepted!\nLogin here http://localhost:3000/login to get started with your entries"
-    # message = "Subject:" + subject + "\n" + body
-
     
-    message = MIMEMultipart("alternative")
-    message["Subject"] = "You're registered. @therefugeeboard"
-    message["From"] = sender_email
-    message["To"] = receiver_email
-
-    # Create the plain-text and HTML version of your message
+    # # Create the plain-text and HTML version of your message
     text = "Subject:" + subject + "\n" + body
     html = """<html>
     <body>
@@ -210,23 +204,13 @@ def createNewCamp():
     </html>
     """
 
-    # Turn these into plain/html MIMEText objects
-    # The second part is always rendered frist so the html part is part 2
-    part1 = MIMEText(text, "plain")
-    part2 = MIMEText(html, "html")
-
-    # Add HTML/plain-text parts to MIMEMultipart message
-    # The email client will try to render the last part first
-    message.attach(part1)
-    message.attach(part2)
-
-    context = ssl.create_default_context()
-    with smtplib.SMTP(smtp_server, port) as server:
-        server.ehlo() 
-        server.starttls(context=context)
-        server.ehlo() 
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, message.as_string())
+    msg = Message()
+    msg.subject = subject
+    msg.recipients = [email]
+    # msg.sender = os.environ.get('EMAIL')
+    msg.body = text
+    msg.html = html
+    mail.send(msg)
 
     # ------------------------------------
 
@@ -416,23 +400,11 @@ def deleteCamp(id):
 
     # ------------------------------------
 
-    # Sending a mail to the registered user
-    port = 587  # For starttls
-    smtp_server = "smtp.gmail.com"
-    sender_email = os.environ.get("EMAIL")
-    receiver_email = camp_to_delete.CampEmail
-    password = os.environ.get("APP_PASSWORD")
 
     # Option 1: Plain text
     subject = "Camp deleted. @therefugeeboard"
     body = "Your camp was deleted.\Register here http://localhost:3000/signup to create a camp"
     # message = "Subject:" + subject + "\n" + body
-
-    
-    message = MIMEMultipart("alternative")
-    message["Subject"] = "Camp deleted. @therefugeeboard"
-    message["From"] = sender_email
-    message["To"] = receiver_email
 
     # Create the plain-text and HTML version of your message
     text = "Subject:" + subject + "\n" + body
@@ -444,23 +416,13 @@ def deleteCamp(id):
     </html>
     """
 
-    # Turn these into plain/html MIMEText objects
-    # The second part is always rendered frist so the html part is part 2
-    part1 = MIMEText(text, "plain")
-    part2 = MIMEText(html, "html")
-
-    # Add HTML/plain-text parts to MIMEMultipart message
-    # The email client will try to render the last part first
-    message.attach(part1)
-    message.attach(part2)
-
-    context = ssl.create_default_context()
-    with smtplib.SMTP(smtp_server, port) as server:
-        server.ehlo() 
-        server.starttls(context=context)
-        server.ehlo() 
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, message.as_string())
+    msg = Message()
+    msg.subject = subject
+    msg.recipients = [camp_to_delete.CampEmail]
+    # msg.sender = os.environ.get('EMAIL')
+    msg.body = text
+    msg.html = html
+    mail.send(msg)
 
     # ------------------------------------
     session.pop("user_id")
@@ -755,6 +717,10 @@ def updatedCamp():
     updatedDetails = request.get_json() # Expecting a JSON object with the RefugeeID and ALL the updated details.
     # refugee = Refugee.query.filter_by(RefugeeID=id).first() 
     # refugee = Refugee.query.get_or_404(updatedDetails["RefugeeID"]) # Automatically sends a 404 if not found
+
+    password=updatedDetails.get("password")
+    confirmPassword=updatedDetails.get("ConfirmPassword")
+
     camp = Camp.query.get_or_404(id) # Automatically sends a 404 if not found
     print('UPDATE ', camp)
     
@@ -762,6 +728,30 @@ def updatedCamp():
     # Checking if the refugee belongs to the same camp as the logged in camp representative.
     if camp.CampID != id:
         return jsonify({"error": "You are not allowed to update this refugee"}), 403
+
+    # You can either edit passwords or edit camp details; not both hence the if blocks
+    if password is not None and confirmPassword is not None:
+        if not password.strip():
+            return jsonify({"error": "Passwords cannot be empty"}),401
+        if password != confirmPassword:
+            return jsonify({"error": "Passwords not matching"}),401
+        if not validate_password(password):
+            return jsonify({"error": "Invaid password pattern."}),401
+        
+        hashed_password=bcrypt.generate_password_hash(password)
+        if request.method == 'PATCH':
+        # Updating the refugee
+            camp.password = hashed_password
+
+            db.session.add(camp) # SQL Alchemy will update if it exists.
+            db.session.commit()
+            
+            session.pop("user_id")
+            return jsonify({"data": camp}),200
+        else:
+        # Some other method was used
+            return jsonify({"error": "Method not allowed"}),405
+
 
     camp_name= updatedDetails.get('CampName')
     address= updatedDetails.get('CampAddress')
@@ -787,6 +777,44 @@ def updatedCamp():
     else:
         # Some other method was used
         return jsonify({"error": "Method not allowed"}),405
+    
+@app.route('/api/forgotpw')
+def forgotPassword():
+    email=request.json["email"]
+    camp=Camp.query.filter_by(CampEmail=email).first()
+    if not camp:
+        return jsonify({"error": "No account with the entered email exists"}),400
+
+    subject = "Rest Password. @therefugeeboard"
+    body = "Reset your password here http://localhost:3000/login to login to your account"
+    
+    # # Create the plain-text and HTML version of your message
+    text = "Subject:" + subject + "\n" + body
+    html = """<html>
+    <body>
+        <h2>Your registeration was accepted!</h2>
+        <p><em><a href="http://localhost:3000/login">Login here</a></em> to get started with your entries</p>
+    </body>
+    </html>
+    """
+
+    msg = Message()
+    msg.subject = subject
+    msg.recipients = [email]
+    # msg.sender = os.environ.get('EMAIL')
+    msg.body = text
+    msg.html = html
+    mail.send(msg)
+
+    session["user_id"]=camp.CampID
+    # No need of Custom JSON encoder for this
+    return jsonify({
+        "data": camp,
+    })
+
+    
+
+        
 
 # Running the app
 if(__name__=="__main__"):

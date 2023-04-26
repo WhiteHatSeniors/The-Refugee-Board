@@ -12,12 +12,13 @@ async function deleteAcc() {
         const response = await AxFetch.delete(
             "/api/delete/camp/"+id
           );
+          console.log(response)
           localStorage.removeItem("id")
-          return {data:response.data.data,  status:response.status}
+          return {data:response?.data?.data,  status:response?.status}
 
     }catch({response}){
         console.log(response)
-        return { error:response.data.error, status:response.status }
+        return { error:response?.data?.error, status:response?.status }
     }
 }
 

@@ -51,10 +51,10 @@ export default function Login() {
             if (data.status <= 299) {
                 // setUser(data.data)
                 console.log(data.data)
-                setUser(data.data)
-                localStorage.setItem("id", JSON.stringify(data.data.CampID))
-                queryClient.setQueryData(['User'], data)
                 setTimeout(() => {
+                    setUser(data.data)
+                    localStorage.setItem("id", JSON.stringify(data.data.CampID))
+                    queryClient.setQueryData(['User'], data)
                     navigate('/admin')
                 }, 1500)
                 setEmail("")
