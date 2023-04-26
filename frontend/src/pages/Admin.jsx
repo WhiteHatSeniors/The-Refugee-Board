@@ -91,8 +91,11 @@ function Admin() {
             },
             onSuccess: (data) => {
                 console.log(data)
-                // navigate('/');
-                // queryClient.setQueryData(['camp-refugees'],  )
+                setUser(prev => {
+                    prev.NumberOfRefugees -= 1;
+                    console.log("DELETE ENTRY : ", prev)
+                    return prev
+                })
             },
             onError: (error) => {
                 console.log(error)

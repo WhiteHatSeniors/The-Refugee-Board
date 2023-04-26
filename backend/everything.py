@@ -652,6 +652,7 @@ def getCamp():
     camp_details = {
         "CampID": camp.CampID,
         "CampName": camp.CampName,
+        "CampEmail":camp.CampEmail,
         "CampAddress": camp.CampAddress,
         "NumberOfRefugees": camp.NumberOfRefugees,
         "created_at": camp.created_at
@@ -735,6 +736,54 @@ def updateRefugee(id):
         db.session.commit()
 
         return jsonify({"data": refugee}),200
+    else:
+        # Some other method was used
+        return jsonify({"error": "Method not allowed"}),405
+    
+# Updating a Camp details
+@app.route('/api/patch/camp',methods=["PATCH"])
+def updatedCamp():
+
+    # You need to be logged in to update a refugee entry
+    id = session.get("user_id")
+    if not id:
+        return jsonify({"error": "Not logged in"}), 403
+    
+    # The HTTP 403 Forbidden response status code indicates that the server understands the request but refuses to authorize it
+    
+    # Recieving details of the refugee
+    updatedDetails = request.get_json() # Expecting a JSON object with the RefugeeID and ALL the updated details.
+    # refugee = Refugee.query.filter_by(RefugeeID=id).first() 
+    # refugee = Refugee.query.get_or_404(updatedDetails["RefugeeID"]) # Automatically sends a 404 if not found
+    camp = Camp.query.get_or_404(id) # Automatically sends a 404 if not found
+    print('UPDATE ', camp)
+    
+    # Checking if the logged in camp representative is allowed to update the refugee
+    # Checking if the refugee belongs to the same camp as the logged in camp representative.
+    if camp.CampID != id:
+        return jsonify({"error": "You are not allowed to update this refugee"}), 403
+
+    camp_name= updatedDetails.get('CampName')
+    address= updatedDetails.get('CampAddress')
+
+    if not camp_name and not camp_name.strip():
+        return jsonify({"error": "Camp name has to be entered"}),400
+    elif not address and not address.strip():
+        return jsonify({"error": "Address has to be entered"}),400
+    if address and camp_name:
+        address_name_exists=Camp.query.filter_by(CampAddress=address.strip(), CampName=camp_name.strip()).first() is not None
+        if address_name_exists:
+            return jsonify({"error": "User already exists"}),409
+
+    if request.method == 'PATCH':
+        # Updating the refugee
+        camp.CampName = updatedDetails['CampName']
+        camp.CampAddress = updatedDetails['CampAddress']
+
+        db.session.add(camp) # SQL Alchemy will update if it exists.
+        db.session.commit()
+
+        return jsonify({"data": camp}),200
     else:
         # Some other method was used
         return jsonify({"error": "Method not allowed"}),405

@@ -30,11 +30,15 @@ function Navbar({ user, setUser }) {
                 {user && <Link className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 mx-3" type='button' onClick={async (e) => {
                     // e.preventDefault()
                     try {
-                        const con = confirm("Do you want to delete the camp?")
-                        if (con) {
-                            await deleteAcc();
-                            setUser(null)
-                            navigate('/')
+                        const con1 = confirm("Do you want to delete the camp?")
+                        if (con1) {
+                            const con2 = confirm("This action is irreversible. Are you sure you want to delete the Camp?")
+                            if (con2) {
+                                await deleteAcc();
+                                setUser(null)
+                                navigate('/')
+                            }
+
                         }
                     } catch (err) {
                         console.log(err)

@@ -8,7 +8,7 @@ import ErrMessage from '../components/ErrMessage';
 function EditProfile() {
     const { state } = useLocation();
     console.log(state)
-    const [age, setAge] = useState("")
+    const [campAddress, setCampAddress] = useState("")
     const [name, setName] = useState("")
     const [gender, setGender] = useState("")
     const [origin, setOrigin] = useState("")
@@ -30,18 +30,13 @@ function EditProfile() {
             console.log("STATE ", state)
             const data = await AxFetch.get('/api/getId');
             const { id } = data.data;
-            if (location.pathname == '/edit-profile/') {
+            if (location.pathname == '/edit-profile') {
                 console.log('HAHAHHAHAHAHAH ', user)
                 console.log(state, localStorage.getItem('id'))
                 if (!(user?.CampID) && !localStorage.getItem('id')) navigate('/')
                 else if (user?.CampID != id) navigate('/admin')
-                setName(state?.Name)
-                setAge(state?.Age)
-                setGender(state?.Gender)
-                setMessage(state?.Message)
-                setOrigin(state?.CountryOfOrigin)
-                //state.CampID would be undefined if a user enters the url directly as opposed to entering the edit button
-                //if user is undefined then yhe's not authorized or if state.campID is there but if the id doesnt match the user id then again not auth
+                setName(user?.CampName)
+                setCampAddress(user?.CampAddress)
             }
         }
 
@@ -57,7 +52,7 @@ function EditProfile() {
         console.log(data, id, "fdfdghffhdhfdhghdfg")
         //Checking if user is authorized
         if (!id) return setUser(null);
-        else return AxFetch.patch(`/api/patch/refugee/${state?.RefugeeID}`, refData)
+        else return AxFetch.patch(`/api/patch/camp`, refData)
     }
 
     const { mutate: editMutation, data: editData, error: editError, isError } = useMutation(
@@ -71,6 +66,8 @@ function EditProfile() {
                 console.log(data.data.data)
                 // return queryClient.invalidateQueries(["camp-refugees"]);
                 if (!(data?.error)) {
+                    console.log(user)
+                    setUser(data.data.data)
                     setTimeout(() => {
                         navigate('/admin')
                     }, 2000)
@@ -84,7 +81,7 @@ function EditProfile() {
     const editHandler = async (e) => {
         e.preventDefault()
         await editMutation({
-            Age: age, Name: name, Gender: gender, CountryOfOrigin: origin, Message: message
+            CampName: name, CampAddress: campAddress
         })
         console.log("DATA ", editData)
         console.log("isErr ", isError)
@@ -96,7 +93,11 @@ function EditProfile() {
     return (
         <form onSubmit={editHandler} className='flex-row m-auto font-mono'>
 
-            <h1 className='font-bold text-5xl p-10 underline mt-7'>Edit Refugee Details</h1>
+            <h1 className='font-bold text-5xl p-10 underline mt-7'>Edit Camp Details</h1>
+
+            {user?.CampEmail && <p className='mx-auto w-[50%] text-start my-6'><span className='underline'>Camp Email:</span>  {user?.CampEmail}</p>}
+            {!(isNaN(user?.NumberOfRefugees)) && <p className='mx-auto w-[50%] text-start my-6'><span className='underline'>Number of Refugees:</span>  {user?.NumberOfRefugees}</p>}
+            {user?.created_at && <p className='mx-auto w-[50%] text-start my-6'><span className='underline'>Created at: </span>  {user?.created_at}</p>}
 
             <label>
                 <p className='w-[50%] mx-auto text-start mb-0'>Name</p>
@@ -105,26 +106,11 @@ function EditProfile() {
             </label>
 
             <label>
-                <p className='w-[50%] mx-auto text-start mb-0'>Age</p>
-                <input type="number" placeholder='Age' onChange={e => setAge(e.target.value)} value={age} className='border-black border mb-5 mt-2 w-[50%] block mx-auto' />
+                <p className='w-[50%] mx-auto text-start mb-0'>Camp Address</p>
+                <input type="text" placeholder='Camp Address' onChange={e => setCampAddress(e.target.value)} value={campAddress} className='border-black border mb-5 mt-2 w-[50%] block mx-auto' />
             </label>
 
-            <label>
-                <p className='w-[50%] mx-auto text-start mb-0'>Country Of Origin</p>
-                <input type="text" placeholder='Country Of Origin' onChange={e => setOrigin(e.target.value)} value={origin} className='border-black border mb-5 mt-2 w-[50%] block mx-auto' />
-            </label>
-
-            <label>
-                <p className='w-[50%] mx-auto text-start mb-0'>Message</p>
-                <textarea placeholder='Message' onChange={e => setMessage(e.target.value)} value={message} className='border-black border mb-5 mt-2 w-[50%] block mx-auto' ></textarea>
-            </label>
-
-            <label>
-                <p className='w-[50%] mx-auto text-start mb-0'>Gender:</p>
-                <input type="text" placeholder="Gender" onChange={e => setGender(e.target.value)} value={gender} className='border-black border mb-5 mt-2 w-[50%] block mx-auto' />
-            </label>
-
-            <button type="submit" className='p-2 rounded-lg bg-yellow-200'>Submit</button>
+            <button type="submit" className='py-2 px-4 mt-4 rounded-lg bg-yellow-200 hover:bg-yellow-300'>Edit</button>
             {isError && <ErrMessage>{editError?.response?.data?.error}</ErrMessage>}
             {editData && !isError && <SucMessage>Succesfully edited!</SucMessage>}
         </form>
