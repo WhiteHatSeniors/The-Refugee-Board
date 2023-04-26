@@ -5,13 +5,13 @@ import AxFetch from '../utils/axios';
 import SucMessage from '../components/SucMessage';
 
 function CreateEntry() {
-    const [age, setAge] = useState(null)
-    const [name, setName] = useState(null)
-    const [gender, setGender] = useState(null)
-    const [origin, setOrigin] = useState(null)
-    const [message, setMessage] = useState(null)
+    const [age, setAge] = useState("")
+    const [name, setName] = useState("")
+    const [gender, setGender] = useState("")
+    const [origin, setOrigin] = useState("")
+    const [message, setMessage] = useState("")
     const [info, setInfo, user, setUser, campRefs, setCampRefs] = useOutletContext()
-    const [entry, setEntry] = useState(null)
+    const [entry, setEntry] = useState("")
     const location = useLocation();
     const navigate = useNavigate()
     const queryClient = useQueryClient()
@@ -58,6 +58,11 @@ function CreateEntry() {
                     })
                     // setInfo(prev => [data?.data?.data, ...prev])
                     // setCampRefs([data?.data?.data, ...prevData])
+                    setUser(prev => {
+                        prev.NumberOfRefugees += 1;
+                        console.log("CREATE ENTRY : ", prev)
+                        return prev
+                    })
                     setTimeout(() => {
                         navigate('/admin')
                     }, 2000)

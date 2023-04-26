@@ -15,6 +15,10 @@ from datetime import datetime
 from dataclasses import dataclass
 from validate_email import validate_email  
 from flask_session import Session #server side session
+import smtplib, ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from flask_mail import Message,Mail
 # import pycountry
 
 #Note: USE THIS ONLY WHEN return jsonify isnt working. Use this as custom encoder with json.dumps()
@@ -53,9 +57,15 @@ server_session=Session(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get("EMAIL")
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get("EMAIL")
+app.config['MAIL_PASSWORD'] = os.environ.get("APP_PASSWORD")
+mail = Mail(app)
+
 # migrate = Migrate(app, db) WHYYY?
-
-
 
 
 # Models
@@ -112,6 +122,7 @@ def validate_password(password):
     # At least 1 number or digit between [0-9].
     # At least 1 character from [ _ or @ or $ ]. 
 
+    #\s- Returns a match where the string contains a white space character
     if len(password) < 8 or re.search("\s" , password):  
         return False  
     if not (re.search("[a-z]", password) and re.search("[A-Z]", password) and re.search("[0-9]", password) ):
@@ -142,16 +153,14 @@ def createNewCamp():
    
         # 409- (Conflict) indicates that the request could not be processed because of conflict in the request
     print(address, camp_name)
-    if camp_name:
-        camp_exists=Camp.query.filter_by(CampName=camp_name.strip()).first() is not None
-    else:
+    if not camp_name and not camp_name.strip():
         return jsonify({"error": "Camp name has to be entered"}),401
-    if address:
-        address_exists=Camp.query.filter_by(CampAddress=address.strip()).first() is not None
-    else:
+    elif not address and not address.strip():
         return jsonify({"error": "Address has to be entered"}),401
-    if address and camp_name and address_exists and camp_exists:
-        return jsonify({"error": "User already exists"}),409
+    if address and camp_name:
+        address_name_exists=Camp.query.filter_by(CampAddress=address.strip(), CampName=camp_name.strip()).first() is not None
+        if address_name_exists:
+            return jsonify({"error": "User already exists"}),409
    
     # Validating user password
     if not password.strip():
@@ -179,6 +188,32 @@ def createNewCamp():
                 )
     db.session.add(new_camp)
     db.session.commit()
+
+    # ------------------------------------
+
+    # Option 1: Plain text
+    subject = "You're registered. @therefugeeboard"
+    body = "Your registeration was accepted!\nLogin here http://localhost:3000/login to get started with your entries"
+    
+    # # Create the plain-text and HTML version of your message
+    text = "Subject:" + subject + "\n" + body
+    html = """<html>
+    <body>
+        <h2>Your registeration was accepted!</h2>
+        <p><em><a href="http://localhost:3000/login">Login here</a></em> to get started with your entries</p>
+    </body>
+    </html>
+    """
+
+    msg = Message()
+    msg.subject = subject
+    msg.recipients = [email]
+    # msg.sender = os.environ.get('EMAIL')
+    msg.body = text
+    msg.html = html
+    mail.send(msg)
+
+    # ------------------------------------
 
     # No need of Custom JSON encoder for this
     return jsonify({
@@ -289,7 +324,6 @@ def createNewRefugee():
     # if not pycountry.countries.get(name=CountryOfOrigin):
     #     return {"error": "Country Not Found"},400
 
-
     # Creating a new refugee object
     print("Ref details: ",refugee_details)
     id=session.get("user_id");
@@ -305,7 +339,10 @@ def createNewRefugee():
                             # CampAddress=logged_in_camp.CampAddress
                             )
     db.session.add(new_refugee)
-    # print(new_refugee.MessageDate)
+    
+    # logged_in_camp.NumberOfRefugees=logged_in_camp.NumberOfRefugees+1
+    logged_in_camp.NumberOfRefugees=Camp.NumberOfRefugees+1
+    
     db.session.commit()
     ref_info={
             'CampID' : id,
@@ -353,6 +390,9 @@ def deleteRefugee(id):
         "Message": ref.Message,
         "MessageDate": ref.MessageDate
     }
+    logged_in_camp=Camp.query.filter_by(CampID=session.get("user_id")).first()
+
+    logged_in_camp.NumberOfRefugees=Camp.NumberOfRefugees-1
     db.session.commit()
     return jsonify({
         "data": ref
@@ -361,7 +401,7 @@ def deleteRefugee(id):
 
 # Deleting a camp -> Deleting an account
 @app.route('/api/delete/camp/<id>',methods=["DELETE"])
-def deleteCamp():
+def deleteCamp(id):
     # Getting the camp object from the database
     camp_to_delete = Camp.query.filter_by(CampID=id).first()
 
@@ -371,7 +411,6 @@ def deleteCamp():
     
     camp_details = {
             "CampID": camp_to_delete.CampID,
-            "AdminName": camp_to_delete.AdminName,
             "CampName": camp_to_delete.CampName,
             "CampAddress": camp_to_delete.CampAddress,
             "NumberOfRefugees": camp_to_delete.NumberOfRefugees,
@@ -379,6 +418,35 @@ def deleteCamp():
     }
     db.session.delete(camp_to_delete)
     db.session.commit()
+
+    # ------------------------------------
+
+
+    # Option 1: Plain text
+    subject = "Camp deleted. @therefugeeboard"
+    body = "Your camp was deleted.\Register here http://localhost:3000/signup to create a camp"
+    # message = "Subject:" + subject + "\n" + body
+
+    # Create the plain-text and HTML version of your message
+    text = "Subject:" + subject + "\n" + body
+    html = """<html>
+    <body>
+        <h2>Your camp was deleted.</h2>
+        <p><em><a href="http://localhost:3000/signup">Register here</a></em> to create a camp</p>
+    </body>
+    </html>
+    """
+
+    msg = Message()
+    msg.subject = subject
+    msg.recipients = [camp_to_delete.CampEmail]
+    # msg.sender = os.environ.get('EMAIL')
+    msg.body = text
+    msg.html = html
+    mail.send(msg)
+
+    # ------------------------------------
+    session.pop("user_id")
     return jsonify(camp_to_delete),204
 
 # Getting all the camps
@@ -568,6 +636,7 @@ def getCamp():
     camp_details = {
         "CampID": camp.CampID,
         "CampName": camp.CampName,
+        "CampEmail":camp.CampEmail,
         "CampAddress": camp.CampAddress,
         "NumberOfRefugees": camp.NumberOfRefugees,
         "created_at": camp.created_at
@@ -619,7 +688,7 @@ def updateRefugee(id):
     
     # Recieving details of the refugee
     updatedDetails = request.get_json() # Expecting a JSON object with the RefugeeID and ALL the updated details.
-    # refugee = Refugee.query.filter_by(RefugeeID=id).first() # Automatically sends a 404 if not found
+    # refugee = Refugee.query.filter_by(RefugeeID=id).first() 
     # refugee = Refugee.query.get_or_404(updatedDetails["RefugeeID"]) # Automatically sends a 404 if not found
     refugee = Refugee.query.get_or_404(id) # Automatically sends a 404 if not found
     print('UPDATE ', refugee)
@@ -653,6 +722,120 @@ def updateRefugee(id):
     else:
         # Some other method was used
         return jsonify({"error": "Method not allowed"}),405
+    
+# Updating a Camp details
+@app.route('/api/patch/camp',methods=["PATCH"])
+def updatedCamp():
+
+    # You need to be logged in to update a refugee entry
+    id = session.get("user_id")
+    if not id:
+        return jsonify({"error": "Not logged in"}), 403
+    
+    # The HTTP 403 Forbidden response status code indicates that the server understands the request but refuses to authorize it
+    
+    # Recieving details of the refugee
+    updatedDetails = request.get_json() # Expecting a JSON object with the RefugeeID and ALL the updated details.
+    # refugee = Refugee.query.filter_by(RefugeeID=id).first() 
+    # refugee = Refugee.query.get_or_404(updatedDetails["RefugeeID"]) # Automatically sends a 404 if not found
+
+    password=updatedDetails.get("password")
+    confirmPassword=updatedDetails.get("ConfirmPassword")
+
+    camp = Camp.query.get_or_404(id) # Automatically sends a 404 if not found
+    print('UPDATE ', camp)
+    
+    # Checking if the logged in camp representative is allowed to update the refugee
+    # Checking if the refugee belongs to the same camp as the logged in camp representative.
+    if camp.CampID != id:
+        return jsonify({"error": "You are not allowed to update this refugee"}), 403
+
+    # You can either edit passwords or edit camp details; not both hence the if blocks
+    if password is not None and confirmPassword is not None:
+        if not password.strip():
+            return jsonify({"error": "Passwords cannot be empty"}),401
+        if password != confirmPassword:
+            return jsonify({"error": "Passwords not matching"}),401
+        if not validate_password(password):
+            return jsonify({"error": "Invaid password pattern."}),401
+        
+        hashed_password=bcrypt.generate_password_hash(password)
+        if request.method == 'PATCH':
+        # Updating the refugee
+            camp.password = hashed_password
+
+            db.session.add(camp) # SQL Alchemy will update if it exists.
+            db.session.commit()
+            
+            session.pop("user_id")
+            return jsonify({"data": camp}),200
+        else:
+        # Some other method was used
+            return jsonify({"error": "Method not allowed"}),405
+
+
+    camp_name= updatedDetails.get('CampName')
+    address= updatedDetails.get('CampAddress')
+
+    if not camp_name and not camp_name.strip():
+        return jsonify({"error": "Camp name has to be entered"}),400
+    elif not address and not address.strip():
+        return jsonify({"error": "Address has to be entered"}),400
+    if address and camp_name:
+        address_name_exists=Camp.query.filter_by(CampAddress=address.strip(), CampName=camp_name.strip()).first() is not None
+        if address_name_exists:
+            return jsonify({"error": "User already exists"}),409
+
+    if request.method == 'PATCH':
+        # Updating the refugee
+        camp.CampName = updatedDetails['CampName']
+        camp.CampAddress = updatedDetails['CampAddress']
+
+        db.session.add(camp) # SQL Alchemy will update if it exists.
+        db.session.commit()
+
+        return jsonify({"data": camp}),200
+    else:
+        # Some other method was used
+        return jsonify({"error": "Method not allowed"}),405
+    
+@app.route('/api/forgotpw')
+def forgotPassword():
+    email=request.json["email"]
+    camp=Camp.query.filter_by(CampEmail=email).first()
+    if not camp:
+        return jsonify({"error": "No account with the entered email exists"}),400
+
+    subject = "Rest Password. @therefugeeboard"
+    body = "Reset your password here http://localhost:3000/forgot-password to login to your account"
+    
+    # # Create the plain-text and HTML version of your message
+    text = "Subject:" + subject + "\n" + body
+    html = """<html>
+    <body>
+        <h2>Your registeration was accepted!</h2>
+        <p><em><a href="http://localhost:3000/login">Login here</a></em> to get started with your entries</p>
+    </body>
+    </html>
+    """
+
+    msg = Message()
+    msg.subject = subject
+    msg.recipients = [email]
+    # msg.sender = os.environ.get('EMAIL')
+    msg.body = text
+    msg.html = html
+    mail.send(msg)
+
+    session["user_id"]=camp.CampID
+    # No need of Custom JSON encoder for this
+    return jsonify({
+        "data": camp,
+    })
+
+    
+
+        
 
 # Running the app
 if(__name__=="__main__"):

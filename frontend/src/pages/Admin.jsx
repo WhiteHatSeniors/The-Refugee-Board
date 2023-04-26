@@ -7,6 +7,10 @@ import { useQueryClient, useQuery, QueryClient, useMutation } from "@tanstack/re
 import AxFetch from '../utils/axios';
 import ErrMessage from '../components/ErrMessage';
 
+// For Future Use:
+// import { ToastContainer, toast } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
+
 function Admin() {
     const [isActive, setActive] = useState(false)
     const [query, setQuery] = useState("")
@@ -14,8 +18,6 @@ function Admin() {
     const location = useLocation();
     const queryClient = useQueryClient()
     const navigate = useNavigate()
-
-
 
     useEffect(() => {
 
@@ -91,8 +93,11 @@ function Admin() {
             },
             onSuccess: (data) => {
                 console.log(data)
-                // navigate('/');
-                // queryClient.setQueryData(['camp-refugees'],  )
+                setUser(prev => {
+                    prev.NumberOfRefugees -= 1;
+                    console.log("DELETE ENTRY : ", prev)
+                    return prev
+                })
             },
             onError: (error) => {
                 console.log(error)
@@ -145,6 +150,9 @@ function Admin() {
                     <input placeholder="Search by Name, Camp, Address, Age and Country..." onChange={event => setQuery(event.target.value)} onClick={event => setActive(prev => !prev)} className={/*isActive ? 'border-black border-2 px-7 py-3 w-[80%]' :*/ 'border-black border px-7 py-3 w-[60%] font-mono'} />
                     <button type='submit'><FcSearch className='text-center inline-block text-4xl' /></button>
                 </form>
+                {
+                    !isLoading && !(campRefugees?.error) && campRefugees?.length > 0 && <p className='bg-yellow-200 text-black w-[50%] px-3 py-2 mx-auto rounded-lg mt-6 font-mono'>Number of Refugees: {campRefugees.length}</p>
+                }
                 {/* {JSON.stringify(Data)} */}
                 {
                     !isLoading && !(campRefugees?.error) && <DataTable data={campRefugees} col={["Name", "Gender", "CountryOfOrigin", "Age", "Message", "MessageDate"]} query={query} deleteEntry={deleteEntry == undefined ? '' : deleteEntry} editEntry={editEntry == undefined ? '' : editEntry} />

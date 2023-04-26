@@ -70,6 +70,10 @@ function EditEntry() {
                 console.log(data.data.data)
                 // return queryClient.invalidateQueries(["camp-refugees"]);
                 if (!(data?.error)) {
+                    setUser(prev => {
+                        console.log("CREATE ENTRY : ", prev)
+                        return prev
+                    })
                     setTimeout(() => {
                         navigate('/admin')
                     }, 2000)
@@ -161,17 +165,9 @@ function EditEntry() {
                 <input type="text" placeholder="Gender" onChange={e => setGender(e.target.value)} value={gender} className='border-black border mb-5 mt-2 w-[50%] block mx-auto' />
             </label>
 
-            <button type="submit" className='p-2 rounded-lg bg-yellow-200'>Submit</button>
+            <button type="submit" className='p-2 rounded-lg bg-yellow-200'>Edit</button>
             {isError && <ErrMessage>{editError?.response?.data?.error}</ErrMessage>}
             {editData && !isError && <SucMessage>Succesfully edited!</SucMessage>}
-            {/* <p>Please select your favorite Web language:</p> */}
-            {/* <input type="radio" id="html" name="fav_language" value="HTML" />
-            <label for="html">HTML</label>
-            <input type="radio" id="css" name="fav_language" value="CSS" />
-            <label for="css">CSS</label>
-            <input type="radio" id="javascript" name="fav_language" value="JavaScript" />
-            <label for="javascript">JavaScript</label>
-            <button type='submit'></button> */}
         </form>
     )
 }
