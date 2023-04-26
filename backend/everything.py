@@ -786,7 +786,7 @@ def forgotPassword():
         return jsonify({"error": "No account with the entered email exists"}),400
 
     subject = "Rest Password. @therefugeeboard"
-    body = "Reset your password here http://localhost:3000/login to login to your account"
+    body = "Reset your password here http://localhost:3000/forgot-password to login to your account"
     
     # # Create the plain-text and HTML version of your message
     text = "Subject:" + subject + "\n" + body
