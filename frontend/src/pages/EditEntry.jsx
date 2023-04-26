@@ -70,6 +70,10 @@ function EditEntry() {
                 console.log(data.data.data)
                 // return queryClient.invalidateQueries(["camp-refugees"]);
                 if (!(data?.error)) {
+                    setUser(prev => {
+                        console.log("CREATE ENTRY : ", prev)
+                        return prev
+                    })
                     setTimeout(() => {
                         navigate('/admin')
                     }, 2000)
