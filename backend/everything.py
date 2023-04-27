@@ -81,6 +81,7 @@ class Camp(db.Model):
     CampAddress: str = db.Column(db.String(90),nullable=False)
     NumberOfRefugees: int = db.Column(db.Integer, default=0)
     created_at: datetime = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    verified: bool = db.Column(db.Boolean, default=False)
     
     # refugees = relationship("Refugee",cascade="all, delete-orphan") # On Delete Cascade
     refugees = relationship("Refugee", back_populates="camp",cascade="all, delete-orphan") 
@@ -227,6 +228,23 @@ def createNewCamp():
 
     # return jsonify({"data":new_camp.__dict__})-> TypeError: Object of type InstanceState is not JSON serializable
 
+# Verifying a camp
+@app.route('/api/patch/camp/verify/<id>',methods=["PATCH"])
+def verifyCamp(id):
+    # You need to be logged in as the superuser to verify a camp (??)
+
+    # Fetching the camp from the database
+    camp = Camp.query.get_or_404(id) # Automatically sends a 404 if not found
+
+    # Setting the camp as verified
+    camp.verified = True
+
+    # Committing the changes to the database
+    db.session.add(camp)
+    db.session.commit()
+
+    # Returning the camp details
+    return jsonify({"data": camp}),200
 
 # Log In -> Camp Admin loggging in
 @app.route('/api/login',methods=["POST"])
@@ -247,6 +265,9 @@ def login():
     if not bcrypt.check_password_hash(user.password,password):
         return jsonify({"error": "Invalid Email/Password"}),401
     
+    # Checking if the camp is verified
+    if not user.isVerified:
+        return jsonify({"error": "Camp not verified yet"}),401
     
     # Yet to decide on whether to implement this
     # if session.get("user_id"):
@@ -451,7 +472,8 @@ def getAllCamps():
             "CampName": camp.CampName,
             "CampAddress": camp.CampAddress,
             "NumberOfRefugees": camp.NumberOfRefugees,
-            "created_at": camp.created_at
+            "created_at": camp.created_at,
+            "Verified": camp.Verified,
         }
         camps_list.append(camp_details)
     
@@ -637,7 +659,6 @@ def addAllCamps():
                     CampName=camp["CampName"],
                     password = camp["password"],
                     CampAddress=camp["CampAddress"],
-                    NumberOfRefugees=camp["NumberOfRefugees"]
                     )
         db.session.add(new_camp)
         db.session.commit()
