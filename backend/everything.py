@@ -20,7 +20,11 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask_mail import Message,Mail
 import uuid
+# from redis.cluster import RedisCluster
 # import pycountry
+
+
+# [[host=127.0.0.1,port=16379,name=127.0.0.1:16379,server_type=primary,redis_connection=Redis<ConnectionPool<Connection<host=127.0.0.1,port=16379,db=0>>>], ...
 
 #Note: USE THIS ONLY WHEN return jsonify isnt working. Use this as custom encoder with json.dumps()
 # import json
@@ -43,7 +47,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SESSION_TYPE']="redis"
 app.config['SESSION_PERMANENT']=False
-app.config['SESSION_REDIS']=redis.from_url("redis://127.0.0.1:6379")
+app.config['SESSION_REDIS']=redis.from_url("redis://127.0.0.1:6379/0")
 app.config['SESSION_USE_SIGNER']=True
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "None"
@@ -68,6 +72,12 @@ mail = Mail(app)
 
 # migrate = Migrate(app, db) WHYYY?
 
+# Redis config for storing forgot pw hash
+# rc = RedisCluster(host='redis://127.0.0.1',port=6379)
+# print(rc.get_nodes())
+
+
+r = redis.Redis(host='localhost', port=6379, decode_responses=True, db=1)
 
 # Models
 
@@ -266,8 +276,8 @@ def login():
         return jsonify({"error": "Invalid Email/Password"}),401
     
     # Checking if the camp is verified
-    if not user.isVerified:
-        return jsonify({"error": "Camp not verified yet"}),401
+    # if not user.verified:
+    #     return jsonify({"error": "Camp not verified yet"}),401
     
     # Yet to decide on whether to implement this
     # if session.get("user_id"):
@@ -804,28 +814,31 @@ def updatedCamp():
         # Some other method was used
         return jsonify({"error": "Method not allowed"}),405
     
-@app.route('/api/forgotpw')
+@app.route('/api/forgotpw', methods=['POST'])
 def forgotPassword():
 
     if session.get("user_id"):
         return {"error":"User already logged in"},400
     
-    hash=uuid.uuid4()
+    hash=uuid.uuid4().hex
 
     email=request.json["email"]
     camp=Camp.query.filter_by(CampEmail=email).first()
     if not camp:
         return jsonify({"error": "No account with the entered email exists"}),400
 
-    subject = "Rest Password. @therefugeeboard"
-    body = f"Reset your password here http://localhost:3000/reset?id={hash} to login to your account"
+    r.set(hash, email)
+    r.expire(hash, 5*60) #The key will expire after 5 minutes
+    print(r.get(hash))
+    subject = "Reset Password. @therefugeeboard"
+    body = f"Reset your password here http://localhost:3000/reset-password/{hash} to login to your account"
     
     # # Create the plain-text and HTML version of your message
     text = "Subject:" + subject + "\n" + body
     html = f"""<html>
     <body>
-        <h2>Your registeration was accepted!</h2>
-        <p><em><a href="http://localhost:3000/reset?id={hash}">Login here</a></em> to get started with your entries</p>
+        <h2>Change your password now.</h2>
+        <p><em><a href="http://localhost:3000/reset-password/{hash}">Reset your password here</a></em> to login to your account</p>
     </body>
     </html>
     """
@@ -838,13 +851,55 @@ def forgotPassword():
     msg.html = html
     mail.send(msg)
 
-    session["user_id"]=camp.CampID
-    # No need of Custom JSON encoder for this
-    return jsonify({
-        "data": camp,
-    })
 
+    return jsonify({'data': 'Email sent!'}), 200
+
+@app.route('/api/reset/<hash>', methods=['PATCH'])
+def resetPassword(hash):
+
+    id = session.get("user_id")
+    if id:
+        return {"error":"User already logged in"},400
     
+    if not r.exists(hash):
+        return jsonify({'error':'Invalid URL'}),400
+    
+    # Recieving details of the refugee
+    updatedDetails = request.get_json() # Expecting a JSON object with the RefugeeID and ALL the updated details.
+    # refugee = Refugee.query.filter_by(RefugeeID=id).first() 
+    # refugee = Refugee.query.get_or_404(updatedDetails["RefugeeID"]) # Automatically sends a 404 if not found
+
+    password=updatedDetails.get("password")
+    confirmPassword=updatedDetails.get("ConfirmPassword")
+
+    email = r.get(hash)
+    camp = Camp.query.filter_by(CampEmail=email).first() # Automatically sends a 404 if not found
+    print('UPDATE ', camp)
+    
+
+    # You can either edit passwords or edit camp details; not both hence the if blocks
+    if password is not None and confirmPassword is not None:
+        if not password.strip():
+            return jsonify({"error": "Passwords cannot be empty"}),401
+        if password != confirmPassword:
+            return jsonify({"error": "Passwords not matching"}),401
+        if not validate_password(password):
+            return jsonify({"error": "Invaid password pattern."}),401
+        
+        hashed_password=bcrypt.generate_password_hash(password)
+        if request.method == 'PATCH':
+        # Updating the refugee
+            camp.password = hashed_password
+
+            db.session.add(camp) # SQL Alchemy will update if it exists.
+            db.session.commit()
+
+            r.delete(hash)
+
+            return jsonify({"data": camp}),200
+        else:
+        # Some other method was used
+            return jsonify({"error": "Method not allowed"}),405
 
         
 

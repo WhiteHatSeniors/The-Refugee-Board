@@ -19,6 +19,8 @@ import Signup from "./pages/Signup"
 import EditEntry from './pages/EditEntry';
 import EditProfile from './pages/EditProfile';
 import ChangePw from './pages/ChangePw';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 // import { AuthContextProvider } from './Hooks/AuthContext';
 
 
@@ -64,6 +66,14 @@ const router = createBrowserRouter([
       }, {
         path: "change-password",
         element: <ChangePw />
+      }
+      , {
+        path: "forgot-password",
+        element: <ForgotPassword />
+      }
+      , {
+        path: "reset-password/:id",
+        element: <ResetPassword />
       }
     ],
   },

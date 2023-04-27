@@ -29,7 +29,6 @@ export default function Login() {
     //     }
     // }, [user])
 
-
     useEffect(() => {
 
         async function func() {
@@ -37,7 +36,7 @@ export default function Login() {
             const { id } = data.data;
             if (location.pathname == '/login') {
                 console.log('HAHAHHAHAHAHAH ', user, id)
-                if (!(user?.CampID) && id != undefined) navigate('/admin')
+                if (id != undefined) navigate('/admin')
             }
         }
 
@@ -139,6 +138,9 @@ export default function Login() {
             <Link to="/signup" className="block">
                 Not yet registered?{" "}
                 <span className="underline text-blue-900 hover:text-white">Signup</span>
+            </Link>
+            <Link to="/forgot-password" className="block underline text-blue-900 hover:text-white">
+                Forgot Password
             </Link>
             {userData?.status >= 400 && <ErrMessage>{userData?.error}</ErrMessage>}
             {userData?.status < 299 && <SucMessage>Succesfully Logged in!</SucMessage>}

@@ -22,4 +22,18 @@ async function deleteAcc() {
     }
 }
 
-export { deleteAcc }
+async function forgotPw(email) {
+    try{
+        const response = await AxFetch.post(
+            "/api/forgotpw",
+            { email },
+          );
+          console.log({data:response.data.data,  status:response.status})
+          return {data:response.data.data,  status:response.status}
+
+    }catch({response}){
+        return { error:response.data.error, status:response.status }
+    }
+}
+
+export { deleteAcc, forgotPw }
