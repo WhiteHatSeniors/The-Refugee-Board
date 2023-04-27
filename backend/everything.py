@@ -276,8 +276,8 @@ def login():
         return jsonify({"error": "Invalid Email/Password"}),401
     
     # Checking if the camp is verified
-    # if not user.verified:
-    #     return jsonify({"error": "Camp not verified yet"}),401
+    if not user.verified:
+        return jsonify({"error": "Camp not verified yet"}),401
     
     # Yet to decide on whether to implement this
     # if session.get("user_id"):
