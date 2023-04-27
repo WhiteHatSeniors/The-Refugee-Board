@@ -6,6 +6,7 @@ import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { useQueryClient, useQuery, QueryClient, useMutation } from "@tanstack/react-query"
 import AxFetch from '../utils/axios';
 import ErrMessage from '../components/ErrMessage';
+import { FaPlusCircle } from 'react-icons/fa';
 
 // For Future Use:
 // import { ToastContainer, toast } from 'react-toastify';
@@ -146,12 +147,12 @@ function Admin() {
             <h1 className='font-bold font-mono text-6xl p-10'>The Admin Dashboard</h1>
             <div className='text-center'>
                 <form className='flex-row' onSubmit={subHandler}>
-                    <button type="button" className="text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" onClick={(e) => navigate('/create-entry')}>Create Entry</button>
+                    <button type="button" className="text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-4 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" onClick={(e) => navigate('/create-entry')}><FaPlusCircle /></button>
                     <input placeholder="Search by Name, Camp, Address, Age and Country..." onChange={event => setQuery(event.target.value)} onClick={event => setActive(prev => !prev)} className={/*isActive ? 'border-black border-2 px-7 py-3 w-[80%]' :*/ 'border-black border px-7 py-3 w-[60%] font-mono'} />
                     <button type='submit'><FcSearch className='text-center inline-block text-4xl' /></button>
                 </form>
                 {
-                    !isLoading && !(campRefugees?.error) && campRefugees?.length > 0 && <p className='bg-yellow-200 text-black w-[50%] px-3 py-2 mx-auto rounded-lg mt-6 font-mono'>Number of Refugees: {campRefugees.length}</p>
+                    !isLoading && !(campRefugees?.error) && campRefugees?.length > 0 && <p className='bg-yellow-200 text-black w-[50%] px-3 py-2 mx-auto rounded-lg mt-6 font-mono hover:bg-yellow-300'>Number of Refugees: {campRefugees.length}</p>
                 }
                 {/* {JSON.stringify(Data)} */}
                 {
@@ -167,5 +168,6 @@ function Admin() {
         </div>
     )
 }
+// IoCreate IoIosCreate FaPlusSquare FaPlusCircle
 
 export default Admin

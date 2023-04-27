@@ -116,7 +116,7 @@ function CreateEntry() {
             <input type="text" placeholder='Country of origin' onChange={e => setOrigin(e.target.value)} value={origin} className='border-black border m-5 w-[50%] block mx-auto' />
             <textarea placeholder='Message' onChange={e => setMessage(e.target.value)} value={message} className='border-black border m-5 w-[50%] block mx-auto' ></textarea>
             <input type="text" placeholder="Gender" onChange={e => setGender(e.target.value)} value={gender} className='border-black border m-5 w-[50%] block mx-auto' />
-            <button type="submit" className='p-2 rounded-lg bg-yellow-200'>Submit</button>
+            <button type="submit" className='p-2 rounded-lg bg-yellow-200 hover:bg-yellow-300'>Submit</button>
             {isError && <div className="p-2 my-10 mx-auto w-[60%] text-sm text-red-800 rounded-lg bg-red-100 dark:text-red-700 flex items-center justify-center" role="alert">
                 <span className="font-medium">{mutateError?.response?.data?.error}</span></div>}
             {mutateData && !isError && <SucMessage>Succesfully added!</SucMessage>}
