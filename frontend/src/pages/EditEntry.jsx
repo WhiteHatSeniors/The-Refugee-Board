@@ -165,7 +165,7 @@ function EditEntry() {
                 <input type="text" placeholder="Gender" onChange={e => setGender(e.target.value)} value={gender} className='border-black border mb-5 mt-2 w-[50%] block mx-auto' />
             </label>
 
-            <button type="submit" className='p-2 rounded-lg bg-yellow-200'>Edit</button>
+            <button type="submit" className='p-2 rounded-lg bg-yellow-200 hover:bg-yellow-300'>Edit</button>
             {isError && <ErrMessage>{editError?.response?.data?.error}</ErrMessage>}
             {editData && !isError && <SucMessage>Succesfully edited!</SucMessage>}
         </form>
