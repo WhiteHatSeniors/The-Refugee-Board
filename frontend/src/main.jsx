@@ -21,6 +21,8 @@ import EditProfile from './pages/EditProfile';
 import ChangePw from './pages/ChangePw';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import AdminLogin from './admin/AdminLogin';
+import AdminDashboard from './admin/AdminDashboard';
 // import { AuthContextProvider } from './Hooks/AuthContext';
 
 
@@ -77,6 +79,16 @@ const router = createBrowserRouter([
       }
     ],
   },
+  {
+    path: "/admin-dashboard",
+    element: <AdminDashboard />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/admin-login",
+    element: <AdminLogin />,
+    errorElement: <ErrorPage />,
+  }
 
 ]);
 

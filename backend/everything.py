@@ -468,6 +468,10 @@ def deleteCamp(id):
 @app.route('/api/get/all/camps',methods=["GET"])
 def getAllCamps():
     # Getting all the camps from the database
+
+    if not session.get("user_id"):
+        return jsonify({"error": "Not logged in"}), 403
+    
     camps = Camp.query.all()
 
     # Checking if no camps were found
