@@ -2,7 +2,7 @@ import os
 import re
 import redis
 import dataclasses
-from flask import Flask,jsonify,request,session #client side session storing sessionID
+from flask import Flask,jsonify,request,session,Response,make_response #client side session storing sessionID
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
@@ -19,6 +19,7 @@ import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask_mail import Message,Mail
+import uuid
 # import pycountry
 
 #Note: USE THIS ONLY WHEN return jsonify isnt working. Use this as custom encoder with json.dumps()
@@ -128,10 +129,10 @@ def validate_password(password):
         return False  
     return True  
   
-# https://stackoverflow.com/questions/62614933/flask-session-cookie-expiration
-@app.before_request
-def before_request():
-    session.permanent = True
+# # https://stackoverflow.com/questions/62614933/flask-session-cookie-expiration
+# @app.before_request
+# def before_request():
+#     session.permanent = True
 
 # Creating a new camp -  Sign Up
 @app.route('/api/register',methods=["POST"])
@@ -267,6 +268,10 @@ def logout_user():
     if not session.get("user_id"):
         return jsonify({"msg":"Not logged in, logout not possible"}),404
     session.pop("user_id")
+    resp=make_response("Cookie removed")
+    cookie_val=request.cookies.get('session')
+    resp.delete_cookie("session")
+    resp.set_cookie('session', expires=0)
     return jsonify({"msg":"Succesfully logged out"}),200
 
 
@@ -780,20 +785,26 @@ def updatedCamp():
     
 @app.route('/api/forgotpw')
 def forgotPassword():
+
+    if session.get("user_id"):
+        return {"error":"User already logged in"},400
+    
+    hash=uuid.uuid4()
+
     email=request.json["email"]
     camp=Camp.query.filter_by(CampEmail=email).first()
     if not camp:
         return jsonify({"error": "No account with the entered email exists"}),400
 
     subject = "Rest Password. @therefugeeboard"
-    body = "Reset your password here http://localhost:3000/login to login to your account"
+    body = f"Reset your password here http://localhost:3000/reset?id={hash} to login to your account"
     
     # # Create the plain-text and HTML version of your message
     text = "Subject:" + subject + "\n" + body
-    html = """<html>
+    html = f"""<html>
     <body>
         <h2>Your registeration was accepted!</h2>
-        <p><em><a href="http://localhost:3000/login">Login here</a></em> to get started with your entries</p>
+        <p><em><a href="http://localhost:3000/reset?id={hash}">Login here</a></em> to get started with your entries</p>
     </body>
     </html>
     """
