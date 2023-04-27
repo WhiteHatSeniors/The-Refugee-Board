@@ -55,3 +55,22 @@
 - We also hope to add more features to The Refugee Board, such as a chat system for refugees to chat with their family, friends or loved ones.
 
 - Overall, we hope to make The Refugee Board a useful tool for refugees and their family, friends or loved ones.
+
+## How can I contribute to The Refugee Board?
+
+- You can contribute to The Refugee Board by forking the repository and making a pull request.
+- Please contact the developers about your idea/change before you put you awesome work into it. 😃
+
+## How can I contact the developers of The Refugee Board?
+
+- You can contact the developers of The Refugee Board by sending an email to [therefugeeboard@gmail.com](mailto:therefugeeboard@gmail.com)
+
+- You can also directly contact the developers:
+
+- Sayed Afnan Khazi
+  - [LinkedIn](https://www.linkedin.com/in/sayed-afnan-khazi/)
+  - [Email](mailto:afnanind@gmail.com)
+
+- Syed Hisham Akmal
+  - [LinkedIn](https://www.linkedin.com/in/hisham-akmal-ba7455226/)
+  - [Email](mailto:hisham0502@gmail.com)
