@@ -10,7 +10,7 @@ function Navbar({ user, setUser }) {
     return (
         <nav className='bg-yellow-100 flex justify-evenly items-center p-4 font-mono'>
             <Link to='/' className='font-bold text-2xl'>trb<span className='font-extrabold text-4xld'>.</span></Link>
-            {user && <Link to='/admin'>Dashboard</Link>}
+            {user && <Link to='/camp-dashboard'>Dashboard</Link>}
             <Link to='/about'>About us</Link>
             <Link to='/contact'>Contact</Link>
             {!user && <Link to='/login'>Login</Link>}

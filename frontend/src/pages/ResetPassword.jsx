@@ -28,8 +28,7 @@ function ChangePw() {
             const data = await AxFetch.get('/api/getId');
             const { id } = data.data;
             if (location.pathname == '/reset-password/' + hash) {
-                console.log('HAHAHHAHAHAHAH ', user)
-                if (id != undefined) navigate('/admin')
+                if (id != undefined) navigate('/camp-dashboard')
             }
         }
 

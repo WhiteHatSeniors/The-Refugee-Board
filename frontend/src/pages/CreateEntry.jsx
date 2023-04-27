@@ -64,7 +64,7 @@ function CreateEntry() {
                         return prev
                     })
                     setTimeout(() => {
-                        navigate('/admin')
+                        navigate('/camp-dashboard')
                     }, 2000)
                 }
             },

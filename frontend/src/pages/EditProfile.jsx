@@ -29,7 +29,7 @@ function EditProfile() {
                 console.log('HAHAHHAHAHAHAH ', user)
                 console.log(state, localStorage.getItem('id'))
                 if (!(user?.CampID) && !localStorage.getItem('id')) navigate('/')
-                else if (user?.CampID != id) navigate('/admin')
+                else if (user?.CampID != id) navigate('/camp-dashboard')
                 setName(user?.CampName)
                 setCampAddress(user?.CampAddress)
             }
@@ -64,7 +64,7 @@ function EditProfile() {
                     console.log(user)
                     setUser(data.data.data)
                     setTimeout(() => {
-                        navigate('/admin')
+                        navigate('/camp-dashboard')
                     }, 2000)
                 }
             },

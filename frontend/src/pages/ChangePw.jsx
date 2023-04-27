@@ -30,7 +30,7 @@ function ChangePw() {
                 console.log('HAHAHHAHAHAHAH ', user)
                 console.log(state, localStorage.getItem('id'), user?.CampID == id)
                 if (!(user?.CampID) && !localStorage.getItem('id')) navigate('/')
-                else if (user?.CampID != id) navigate('/admin')
+                else if (user?.CampID != id) navigate('/camp-dashboard')
             }
         }
 

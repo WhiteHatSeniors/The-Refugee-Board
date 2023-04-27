@@ -36,7 +36,7 @@ export default function Login() {
             const { id } = data.data;
             if (location.pathname == '/login') {
                 console.log('HAHAHHAHAHAHAH ', user, id)
-                if (id != undefined) navigate('/admin')
+                if (id != undefined) navigate('/camp-dashboard')
             }
         }
 
@@ -54,7 +54,7 @@ export default function Login() {
                     setUser(data.data)
                     localStorage.setItem("id", JSON.stringify(data.data.CampID))
                     queryClient.setQueryData(['User'], data)
-                    navigate('/admin')
+                    navigate('/camp-dashboard')
                 }, 1500)
                 setEmail("")
                 setPw("")

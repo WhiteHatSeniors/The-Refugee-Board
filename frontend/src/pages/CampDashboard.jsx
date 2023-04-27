@@ -12,7 +12,7 @@ import { FaPlusCircle } from 'react-icons/fa';
 // import { ToastContainer, toast } from 'react-toastify';
 // import 'react-toastify/dist/ReactToastify.css';
 
-function Admin() {
+function CampDashboard() {
     const [isActive, setActive] = useState(false)
     const [query, setQuery] = useState("")
     const [info, setInfo, user, setUser, campRefs, setCampRefs] = useOutletContext()
@@ -25,7 +25,7 @@ function Admin() {
         async function func() {
             const data = await AxFetch.get('/api/getId');
             const { id } = data.data;
-            if (location.pathname == '/admin') {
+            if (location.pathname == '/camp-dashboard') {
                 console.log('HAHAHHAHAHAHAH ', user, id)
                 if (!(user?.CampID) && id == undefined) navigate('/')
             }
@@ -144,7 +144,7 @@ function Admin() {
         //   {info && <p>{JSON.stringify(info)}</p>}
         // </div>
         <div className='p-10'>
-            <h1 className='font-bold font-mono text-6xl p-10'>The Admin Dashboard</h1>
+            <h1 className='font-bold font-mono text-6xl p-10'>The Camp Dashboard</h1>
             <div className='text-center'>
                 <form className='flex-row' onSubmit={subHandler}>
                     <button type="button" className="text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-4 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" onClick={(e) => navigate('/create-entry')}><FaPlusCircle /></button>
@@ -170,4 +170,4 @@ function Admin() {
 }
 // IoCreate IoIosCreate FaPlusSquare FaPlusCircle
 
-export default Admin
+export default CampDashboard

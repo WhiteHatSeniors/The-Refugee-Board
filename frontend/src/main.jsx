@@ -9,7 +9,7 @@ import {
 import About from "./pages/About"
 import Login from "./pages/Login"
 import Contact from "./pages/Contact"
-import Admin from "./pages/Admin"
+import CampDashboard from "./pages/CampDashboard"
 import ErrorPage from "./pages/ErrorPage"
 import Navbar from './components/Navbar';
 import CreateEntry from './pages/CreateEntry';
@@ -35,8 +35,8 @@ const router = createBrowserRouter([
         element: <App />
       },
       {
-        path: "admin",
-        element: <Admin />,
+        path: "camp-dashboard",
+        element: <CampDashboard />,
       },
       {
         path: "about",
@@ -77,14 +77,7 @@ const router = createBrowserRouter([
       }
     ],
   },
-  // {
-  //   path: "/admin",
-  //   element: <Admin />,
-  // },
-  // {
-  //   path: "/about",
-  //   element: <About />,
-  // },
+
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(

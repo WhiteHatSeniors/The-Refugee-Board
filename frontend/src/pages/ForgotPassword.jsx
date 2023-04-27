@@ -21,7 +21,7 @@ export default function Login() {
             const { id } = data.data;
             if (location.pathname == '/forgot-password') {
                 console.log('HAHAHHAHAHAHAH ', user, id)
-                if (id != undefined) navigate('/admin')
+                if (id != undefined) navigate('/camp-dashboard')
             }
         }
 

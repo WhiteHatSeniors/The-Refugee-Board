@@ -33,7 +33,7 @@ function EditEntry() {
                 console.log('HAHAHHAHAHAHAH ', user)
                 console.log(state, localStorage.getItem('id'))
                 if (!(user?.CampID) && !localStorage.getItem('id')) navigate('/')
-                else if (!(state?.CampID) || (state?.CampID != id)) navigate('/admin')
+                else if (!(state?.CampID) || (state?.CampID != id)) navigate('/camp-dashboard')
                 setName(state?.Name)
                 setAge(state?.Age)
                 setGender(state?.Gender)
@@ -75,7 +75,7 @@ function EditEntry() {
                         return prev
                     })
                     setTimeout(() => {
-                        navigate('/admin')
+                        navigate('/camp-dashboard')
                     }, 2000)
                 }
                 // navigate('/');
