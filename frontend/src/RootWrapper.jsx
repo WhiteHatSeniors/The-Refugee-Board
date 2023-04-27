@@ -10,7 +10,6 @@ function RootWrapper() {
     return (
         <QueryClientProvider client={queryClient} >
             <Root />
-            <ReactQueryDevtools initialIsOpen={true} />
         </QueryClientProvider>
     )
 }
