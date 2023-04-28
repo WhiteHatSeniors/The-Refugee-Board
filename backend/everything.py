@@ -849,6 +849,7 @@ def forgotPassword():
     <body>
         <h2>Change your password now.</h2>
         <p><em><a href="http://localhost:3000/reset-password/{hash}">Reset your password here</a></em> to login to your account</p>
+        <h4>If this wasn't you, you can safely ignore the email</h4>
     </body>
     </html>
     """
@@ -905,6 +906,29 @@ def resetPassword(hash):
             db.session.commit()
 
             r.delete(hash)
+
+            subject = "Password reset successful. @therefugeeboard"
+            body = "Your camp account password was reset.\Login here http://localhost:3000/login with the new credentials"
+            # message = "Subject:" + subject + "\n" + body
+
+            # Create the plain-text and HTML version of your message
+            text = "Subject:" + subject + "\n" + body
+            html = """<html>
+            <body>
+                <h2>Your camp account password was reset.</h2>
+                <p><em><a href="http://localhost:3000/login">Login here</a></em> with the new credentials</p>
+            </body>
+            </html>
+            """
+
+            msg = Message()
+            msg.subject = subject
+            msg.recipients = [email.CampEmail]
+            # msg.sender = os.environ.get('EMAIL')
+            msg.body = text
+            msg.html = html
+            mail.send(msg)
+
 
             return jsonify({"data": camp}),200
         else:
