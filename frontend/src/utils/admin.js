@@ -30,11 +30,14 @@ async function deleteCamp(id) {
         const response = await AxFetch.delete(
             "/api/delete/camp/" + id,
           );
-          console.log({data:response.data.data,  status:response.status})
-          return {data:response.data.data,  status:response.status}
+          console.log(response)
+          console.log({data:response?.data?.data,  status:response?.status})
+          return {data:response?.data?.data,  status:response?.status}
 
-    }catch({response}){
-        return { error:response.data.error, status:response.status }
+    }catch(data){
+
+        console.log(data)
+        return { error:data?.data?.error, status:data?.status }
     }
 }
 

@@ -59,20 +59,15 @@ function AdminDashboard() {
         const boolDelete = confirm("Do you want to delete the camp?");
         if (boolDelete) {
             // const data = await adminSignIn(username, pw)
+            console.log(refId)
             const data = await deleteCamp(refId)
-            console.log(data)
+            console.log(camps)
             setCamps(prev => {
-                prev.data.filter((el) => el.CampID != refId);
-                return prev;
-            })
-            // setCamps(data)
-            // setTimeout(() => {
-            //     // queryClient.setQueryData(['User'], data)
-            //     setIsLoading(false)
-            //     // navigate('/admin-dashboard')
-            // }, 1500)
+                const data = prev.data.filter((el) => el.CampID != refId)
+                return { data, status: 200 };
+            }
+            )
         }
-
     }
 
 
