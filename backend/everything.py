@@ -421,8 +421,9 @@ def deleteCamp(id):
     if not session.get("user_id") and not session.get("admin_id"):
         return jsonify({"error": "Not authorized to delete the camp"}),401
 
+    print(id)
     camp_to_delete = Camp.query.filter_by(CampID=id).first()
-
+    print(camp_to_delete,id)
     # Checking if the camp exists
     if camp_to_delete is None:
         return jsonify({"error": "Camp not found"}),404
@@ -464,8 +465,9 @@ def deleteCamp(id):
     mail.send(msg)
 
     # ------------------------------------
-    session.pop("user_id")
-    return jsonify(camp_to_delete),204
+    if session.get("user_id"):
+        session.pop("user_id")
+    return jsonify({"data": camp_details}),204
 
 # Getting all the camps
 @app.route('/api/get/all/camps',methods=["GET"])
