@@ -14,6 +14,20 @@ async function signIn(email, password) {
     }
 }
 
+async function adminSignIn(username, password) {
+    try{
+        const response = await AxFetch.post(
+            "/api/admin-login",
+            { username, password },
+          );
+          console.log({data:response.data.data,  status:response.status})
+          return {data:response.data.data,  status:response.status}
+
+    }catch({response}){
+        return { error:response.data.error, status:response.status }
+    }
+}
+
 
 async function register(data) {
     try{
@@ -41,5 +55,17 @@ async function logout() {
     }
 }
 
+async function adminLogout() {
+    try{
+        const response = await AxFetch.post(
+            "/api/admin-logout",
+          );
+          return {data:response.data.data,  status:response.status}
 
-export { signIn, register, logout }
+    }catch({response}){
+        return { error:response.data.error, status:response.status }
+    }
+}
+
+
+export { signIn, register, logout, adminSignIn,adminLogout }

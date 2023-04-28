@@ -139,8 +139,8 @@ export default function Login() {
                 Not yet registered?{" "}
                 <span className="underline text-blue-900 hover:text-white">Signup</span>
             </Link>
-            <Link to="/forgot-password" className="block underline text-blue-900 hover:text-white">
-                Forgot Password
+            <Link to="/forgot-password" className="block underline mt-5 text-blue-900 hover:text-white">
+                Forgot Password?
             </Link>
             {userData?.status >= 400 && <ErrMessage>{userData?.error}</ErrMessage>}
             {userData?.status < 299 && <SucMessage>Succesfully Logged in!</SucMessage>}

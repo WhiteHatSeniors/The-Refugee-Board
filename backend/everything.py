@@ -276,8 +276,8 @@ def login():
         return jsonify({"error": "Invalid Email/Password"}),401
     
     # Checking if the camp is verified
-    # if not user.verified:
-    #     return jsonify({"error": "Camp not verified yet"}),401
+    if not user.verified:
+        return jsonify({"error": "Camp not verified yet"}),401
     
     # Yet to decide on whether to implement this
     # if session.get("user_id"):
@@ -297,13 +297,13 @@ def login():
 @app.route("/api/logout", methods=["POST"])
 def logout_user():
     if not session.get("user_id"):
-        return jsonify({"msg":"Not logged in, logout not possible"}),404
+        return jsonify({"error":"Not logged in, logout not possible"}),404
     session.pop("user_id")
-    resp=make_response("Cookie removed")
-    cookie_val=request.cookies.get('session')
-    resp.delete_cookie("session")
-    resp.set_cookie('session', expires=0)
-    return jsonify({"msg":"Succesfully logged out"}),200
+    # resp=make_response("Cookie removed")
+    # cookie_val=request.cookies.get('session')
+    # resp.delete_cookie("session")
+    # resp.set_cookie('session', expires=0)
+    return jsonify({"error":"Succesfully logged out"}),200
 
 
 # Getting the user id if logged in
@@ -418,6 +418,9 @@ def deleteRefugee(id):
 @app.route('/api/delete/camp/<id>',methods=["DELETE"])
 def deleteCamp(id):
     # Getting the camp object from the database
+    if not session.get("user_id") and not session.get("admin_id"):
+        return jsonify({"error": "Not authorized to delete the camp"}),401
+
     camp_to_delete = Camp.query.filter_by(CampID=id).first()
 
     # Checking if the camp exists
@@ -469,7 +472,7 @@ def deleteCamp(id):
 def getAllCamps():
     # Getting all the camps from the database
 
-    if not session.get("user_id"):
+    if not session.get("admin_id"):
         return jsonify({"error": "Not logged in"}), 403
     
     camps = Camp.query.all()
@@ -482,16 +485,16 @@ def getAllCamps():
     for camp in camps:
         camp_details = {
             "CampID": camp.CampID,
-            "AdminName": camp.AdminName,
             "CampName": camp.CampName,
             "CampAddress": camp.CampAddress,
+            "CampEmail": camp.CampEmail,
             "NumberOfRefugees": camp.NumberOfRefugees,
             "created_at": camp.created_at,
-            "Verified": camp.Verified,
+            "verified": camp.verified,
         }
         camps_list.append(camp_details)
     
-    return jsonify(camps_list),200
+    return jsonify({"data":camps_list}),200
 
 # Getting all the refugees
 @app.route('/api/get/all/refugees',methods=["GET"])
@@ -536,7 +539,8 @@ def getRefugees():
     # campAddress = args.get("CampAddress")
     searchQuery = args.get("SearchQuery").strip()
 
-    if campID and searchQuery and (id == campID):
+
+    if campID and searchQuery and (id == campID): #For Camp dashboard, camp address and camp name isnt required
         refugees = Refugee.query.filter(
             and_(or_(Refugee.Name.like(f"%{searchQuery}%"),
                  Refugee.CountryOfOrigin.like(f"%{searchQuery}%"),
@@ -904,8 +908,119 @@ def resetPassword(hash):
         else:
         # Some other method was used
             return jsonify({"error": "Method not allowed"}),405
-
         
+
+@app.route('/api/admin-login',methods=["POST"])
+def adminLogin():
+
+    if session.get("admin_id"):
+        return jsonify({"error":"Admin is already logged in"}),401
+
+    username=request.json["username"]
+    # print(request.json, "Hi")
+    password=request.json["password"]
+
+    if not username.strip() or not password.strip():
+        return jsonify({"error": "Username and Password cannot be empty"}),401 
+    # NOTE: Not being specific about errors to make it more secure and prevent brute force attacks
+    print(os.environ.get('ADMIN_USERNAME'))
+    print("PASSWORD ",os.environ.get('ADMIN_PASSWORD'))
+    if not username==os.environ.get('ADMIN_USERNAME'):
+        return jsonify({"error": "Invalid Username/Password"}),401 
+    
+    if not password==os.environ.get('ADMIN_PASSWORD'):
+        return jsonify({"error": "Invalid Username/Password"}),401    
+    
+    print(session)
+    
+    session["admin_id"]=username;
+    return jsonify({"data": username}),200
+
+
+# Log out functionality for the camp admin
+@app.route("/api/admin-logout", methods=["POST"])
+def adminLogout():
+    if not session.get("admin_id"):
+        return jsonify({"error":"Not logged in, logout not possible"}),401
+    
+    session.pop("admin_id")
+    return jsonify({"error":"Succesfully logged out"}),200
+
+@app.route("/api/admin-verify", methods=["PATCH"])
+def adminVerified():
+    if not session.get("admin_id"):
+        return jsonify({"error":"Not logged in"}),401
+    
+    id=request.json.get("id")
+    
+    if not id:
+        return jsonify({"error":"Camp doesnt exist"}),404
+
+    camp = Camp.query.get_or_404(id) 
+    
+    if not camp:
+        return jsonify({"error":"Camp doesnt exist"}),404
+
+    if request.method == 'PATCH':
+        # Updating the refugee
+        camp.verified=1;
+
+        db.session.add(camp) # SQL Alchemy will update if it exists.
+        db.session.commit()
+
+        return jsonify({"data": camp}),200
+    else:
+        # Some other method was used
+        return jsonify({"error": "Method not allowed"}),405
+
+@app.route("/api/getAdminId", methods=["GET"])
+def get_admin_id():
+    print(session ,session.get("admin_id"))
+    if not session.get("admin_id"):
+        return jsonify({"id": None}),200
+    return jsonify({"id": session.get("admin_id")}),200
+
+
+@app.route('/api/get/camps',methods=["GET"])
+def getCampsSearch():
+
+    if not session.get("admin_id"):
+        return jsonify({"error": "Not logged in"}), 403
+    
+    args = request.args
+    id= str(session.get("admin_id"))
+    searchQuery = args.get("SearchQuery").strip()
+
+    if searchQuery:
+        camps = Camp.query.filter(
+            and_(or_(Camp.CampName.like(f"%{searchQuery}%"),
+                 Camp.CampAddress.like(f"%{searchQuery}%"),
+                 Camp.CampEmail.like(f"%{searchQuery}%"),
+            ))
+            ).order_by(Camp.created_at.desc()).all()
+    else:
+       camps = Camp.query.all()
+
+    if camps is None or len(camps) == 0:
+        print("LLOOLOLOL" ,camps)
+        return jsonify({"error": "No camps found"}),404
+
+    camps_list = []
+    for camp in camps:
+        camp_details = {
+            "CampID": camp.CampID,
+            "CampName": camp.CampName,
+            "CampAddress": camp.CampAddress,
+            "CampEmail": camp.CampEmail,
+            "NumberOfRefugees": camp.NumberOfRefugees,
+            "created_at": camp.created_at,
+            "verified": camp.verified,
+        }
+        camps_list.append(camp_details)
+    
+    return jsonify({"data":camps_list}),200
+    
+    
 
 # Running the app
 if(__name__=="__main__"):

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Pagination from './Pagination';
 import { Link } from 'react-router-dom';
-import { FaTrash, FaEdit } from "react-icons/fa";
+import { FaTrash, FaEdit, FaCheckCircle } from "react-icons/fa";
 
 // const col = ["Name", "Gender", "CampName", "CountryOfOrigin", "Age", "Message", "MessageDate"]
 
@@ -10,14 +10,15 @@ function capitalizeFirstLetter(str) {
     // converting first letter to uppercase
     const capitalized = str.charAt(0).toUpperCase() + str.slice(1);
 
-    return capitalized;
+    return capitalized.replace("_", " ");
 }
 
 
 const ThData = ({ column }) => column.map((data, id) => <th key={id} className='p-5'>{capitalizeFirstLetter(data.replace(/([A-Z])/g, ' $1').trim())}</th>)
 
-const TdData = ({ data, column, deleteEntry, editEntry }) => {
+const TdData = ({ data, column, deleteEntry, editEntry, verifyEntry }) => {
     if (data) {
+        console.log(verifyEntry)
         console.log(data)
         // console.log(column)
         return data.map((data, id) => {
@@ -31,6 +32,7 @@ const TdData = ({ data, column, deleteEntry, editEntry }) => {
                     {
                         editEntry && <td><Link title='Edit entry' type='button' to={`/edit-entry/${data.RefugeeID}`} state={data}><button className="text-green-700 hover:btextgreen-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-center mx-3 dark:text-green-600 dark:hover:text-green-700 dark:focus:ring-green-800"><FaEdit /></button></Link></td>}
                     {deleteEntry && <td><button title='Delete entry' className="text-red-700 hover:text-red-800 font-medium rounded-full mx-3 pr-2 dark:text-red-600 dark:hover:text-red-700 dark:focus:ring-red-900" onClick={(e) => deleteEntry(data.RefugeeID)}><FaTrash /></button></td>}
+                    {!data.verified && verifyEntry && <td><button title='Verify entry' className="text-green-700 hover:text-green-800 font-medium rounded-full mx-3 pr-2 dark:text-green-600 dark:hover:text-green-700 dark:focus:ring-green-900" onClick={(e) => verifyEntry(data.CampID)}><FaCheckCircle /></button></td>}
                 </tr>
                 // className="text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-3 py-2.5 text-center mr-3 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
             )
@@ -41,7 +43,7 @@ const TdData = ({ data, column, deleteEntry, editEntry }) => {
 
 
 
-export default function DataTable({ data, query, deleteEntry, editEntry, col }) {
+export default function DataTable({ data, query, deleteEntry, editEntry, col, verifyEntry }) {
     // console.log(data)
 
     // User is currently on this page
@@ -67,7 +69,7 @@ export default function DataTable({ data, query, deleteEntry, editEntry, col }) 
                         <tr><ThData column={col} /></tr>
                     </thead>
                     <tbody>
-                        <TdData data={currentRecords} column={col} deleteEntry={deleteEntry} editEntry={editEntry} />
+                        <TdData data={currentRecords} column={col} deleteEntry={deleteEntry} editEntry={editEntry} verifyEntry={verifyEntry} />
                     </tbody>
                 </table>
                 < Pagination nPages={nPages} currentPage={currentPage} setCurrentPage={setCurrentPage} />

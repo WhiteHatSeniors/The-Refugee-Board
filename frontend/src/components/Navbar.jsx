@@ -14,6 +14,7 @@ function Navbar({ user, setUser }) {
             <Link to='/about'>About us</Link>
             <Link to='/contact'>Contact</Link>
             {!user && <Link to='/login'>Login</Link>}
+            {!user && <Link to='/admin-login'>Admin Login</Link>}
             {user && <Link type='button' onClick={async (e) => {
                 e.preventDefault()
                 try {
