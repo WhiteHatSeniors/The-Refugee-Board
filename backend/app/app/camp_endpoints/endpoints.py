@@ -222,7 +222,7 @@ def getAllCamps():
             "created_at": camp.created_at,
             "Verified": camp.Verified,
         }
-        camps_list.append(camp_details)
+        camps_list.append(camp_details).order_by(Camp.created_at.desc())
     
     return jsonify(camps_list),200
 
@@ -367,7 +367,7 @@ def getCampsSearch():
             ))
             ).order_by(Camp.created_at.desc()).all()
     else:
-       camps = Camp.query.all()
+       camps = Camp.query.order_by(Camp.created_at.desc()).all()
 
     if camps is None or len(camps) == 0:
         print("LLOOLOLOL" ,camps)
