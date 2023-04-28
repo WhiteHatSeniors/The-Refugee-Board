@@ -104,10 +104,12 @@ function AdminDashboard() {
             if (boolVerify) {
                 // const data = await adminSignIn(username, pw)
                 const data = await verifyCamp(campId)
+                console.log(camps)
                 setCamps(prev => {
                     prev.data.find((el) => el.CampID == campId).verified = 1;
-                    return prev;
+                    return { data: [...prev.data], prev: 200 };
                 })
+                console.log(camps)
                 console.log(data)
                 // setCamps(data)
                 // setTimeout(() => {

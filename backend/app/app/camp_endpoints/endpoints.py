@@ -72,15 +72,15 @@ def createNewCamp():
     # ------------------------------------
 
     # Option 1: Plain text
-    subject = "You're registered. @therefugeeboard"
-    body = "Your registeration was accepted!\nLogin here http://localhost:3000/login to get started with your entries"
+    subject = "Your registeration is underway. @therefugeeboard"
+    body = "We're considering your registeration\nWe'll approach you for verification at the earliest!"
     
     # # Create the plain-text and HTML version of your message
     text = "Subject:" + subject + "\n" + body
     html = """<html>
     <body>
-        <h2>Your registeration was accepted!</h2>
-        <p><em><a href="http://localhost:3000/login">Login here</a></em> to get started with your entries</p>
+        <h2>We're considering your registeration</h2>
+        <p><em>We'll approach you for verification at the earliest!</em></p>
     </body>
     </html>
     """
@@ -121,6 +121,28 @@ def verifyCamp(id):
     # Committing the changes to the database
     db.session.add(camp)
     db.session.commit()
+
+    subject = "You're verified. @therefugeeboard"
+    body = "Your registeration was accepted!\nLogin here http://localhost:3000/login to get started with your entries"
+    
+    # # Create the plain-text and HTML version of your message
+    text = "Subject:" + subject + "\n" + body
+    html = """<html>
+    <body>
+        <h2>Your registeration was accepted!</h2>
+        <p><em><a href="http://localhost:3000/login">Login here</a></em> to get started with your entries</p>
+    </body>
+    </html>
+    """
+
+    msg = Message()
+    msg.subject = subject
+    msg.recipients = [camp.CampEmail]
+    # msg.sender = os.environ.get('EMAIL')
+    msg.body = text
+    msg.html = html
+    mail.send(msg)
+
 
     # Returning the camp details
     return jsonify({"data": camp}),200

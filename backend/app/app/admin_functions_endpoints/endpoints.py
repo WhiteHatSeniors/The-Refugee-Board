@@ -34,8 +34,8 @@ def login():
         return jsonify({"error": "Invalid Email/Password"}),401
     
     # Checking if the camp is verified
-    # if not user.verified:
-    #     return jsonify({"error": "Camp not verified yet"}),401
+    if not user.verified:
+        return jsonify({"error": "Camp not verified yet"}),401
     
     # Yet to decide on whether to implement this
     # if session.get("user_id"):
@@ -76,13 +76,16 @@ def forgotPassword():
     if session.get("user_id"):
         return {"error":"User already logged in"},400
     
-    hash=uuid.uuid4().hex
 
     email=request.json["email"]
     camp=Camp.query.filter_by(CampEmail=email).first()
     if not camp:
         return jsonify({"error": "No account with the entered email exists"}),400
 
+    for key in r.scan_iter():
+        if r.get(key)==email:
+             return jsonify({"error": "Password recovery mail sent"}),400
+    hash=uuid.uuid4().hex
     r.set(hash, email)
     r.expire(hash, 5*60) #The key will expire after 5 minutes
     print(r.get(hash))
@@ -169,7 +172,7 @@ def resetPassword(hash):
 
             msg = Message()
             msg.subject = subject
-            msg.recipients = [email.CampEmail]
+            msg.recipients = [email]
             # msg.sender = os.environ.get('EMAIL')
             msg.body = text
             msg.html = html
@@ -238,7 +241,29 @@ def adminVerified():
         db.session.add(camp) # SQL Alchemy will update if it exists.
         db.session.commit()
 
+        subject = "You're verified. @therefugeeboard"
+        body = "Your registeration was accepted!\nLogin here http://localhost:3000/login to get started with your entries"
+        
+        # # Create the plain-text and HTML version of your message
+        text = "Subject:" + subject + "\n" + body
+        html = """<html>
+        <body>
+            <h2>Your registeration was accepted!</h2>
+            <p><em><a href="http://localhost:3000/login">Login here</a></em> to get started with your entries</p>
+        </body>
+        </html>
+        """
+
+        msg = Message()
+        msg.subject = subject
+        msg.recipients = [camp.CampEmail]
+        # msg.sender = os.environ.get('EMAIL')
+        msg.body = text
+        msg.html = html
+        mail.send(msg)
+
         return jsonify({"data": camp}),200
+    
     else:
         # Some other method was used
         return jsonify({"error": "Method not allowed"}),405
