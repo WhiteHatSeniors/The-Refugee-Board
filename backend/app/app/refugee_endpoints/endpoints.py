@@ -6,6 +6,7 @@ from app.models.camp import Camp
 from app.models.refugee import Refugee
 from datetime import datetime
 from sqlalchemy import or_, and_
+from werkzeug.utils import secure_filename
 
 # Test Route
 
@@ -17,8 +18,8 @@ from sqlalchemy import or_, and_
 # Adding a refugee
 @bp.route('/api/post/refugee',methods=["POST"])
 def createNewRefugee():
-    # Recieving details of the refugee
-    print(session, session.get("user_id"), "hfgdfgd")
+
+    # Making sure the user is logged in
     if not session.get("user_id"):
         return jsonify({"error": "Not logged in"}), 403
     
@@ -40,9 +41,8 @@ def createNewRefugee():
     #     return {"error": "Country Not Found"},400
 
     # Creating a new refugee object
-    print("Ref details: ",refugee_details)
-    id=session.get("user_id");
-    new_refugee = Refugee(CampID= id
+    camp_id=session.get("user_id");
+    new_refugee = Refugee(CampID= camp_id
                         #   or refugee_details["CampID"]
                           ,
                             Name = refugee_details["Name"],
@@ -254,7 +254,6 @@ def getRefugees():
 def addAllRefugees():
     # return {"Not allowed":"Not allowed"}
     refugees = request.get_json()
-    print(refugees)
     for refugee in refugees:
         new_refugee = Refugee(CampID= refugee["CampID"],
                             Name = refugee["Name"],
@@ -265,6 +264,33 @@ def addAllRefugees():
         db.session.add(new_refugee)
         db.session.commit()
     return jsonify(refugees)
+
+@bp.route('/api/post/refugee/csv',methods=["POST"])
+def addRefugee():
+    # The csv file is converted to a JSON object and sent to this route
+    
+    # Making sure the user is logged in
+    if not (camp_id := session.get("user_id")): # Python Walrus operator assignment expression
+        return jsonify({"error": "Not logged in"}), 403
+    
+    refugees = request.get_json()
+
+    try:
+        for refugee in refugees:
+            new_refugee = Refugee(CampID = camp_id,
+                                Name = refugee["Name"],
+                                Gender = refugee["Gender"],
+                                Age = refugee["Age"],
+                                CountryOfOrigin = refugee["CountryOfOrigin"],
+                                Message = refugee["Message"]
+                        )
+            db.session.add(new_refugee)
+            db.session.commit()
+    except:
+        return jsonify({"error": "Error adding refugees"}), 400
+
+    return jsonify(refugees),200
+    
 
 # Updating a refugees details
 @bp.route('/api/patch/refugee/<id>',methods=["PATCH"])
