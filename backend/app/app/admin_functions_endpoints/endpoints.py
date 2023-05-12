@@ -7,6 +7,7 @@ from flask_mail import Message
 from app.models.camp import Camp
 from app.extensions import db, validate_password
 import os
+
 # Test Route
 
 # @bp.route('/a')
