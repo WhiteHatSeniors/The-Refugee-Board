@@ -32,7 +32,7 @@ def create_app(config_class = Config):
 
     # Bcrypt
     bcrypt.init_app(app)
-
+    
     # Flask session
     from flask_session import Session
     # server_session = Session(app)

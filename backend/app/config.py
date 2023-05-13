@@ -20,7 +20,6 @@ class Config:
     SESSION_USE_SIGNER = True
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = "None"
-
     # For Mail
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
@@ -28,3 +27,4 @@ class Config:
     MAIL_USERNAME = os.environ.get("EMAIL")
     MAIL_DEFAULT_SENDER = os.environ.get("EMAIL")
     MAIL_PASSWORD = os.environ.get("APP_PASSWORD")
+    UPLOAD_FOLDER =  'static/files'

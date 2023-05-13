@@ -7,6 +7,7 @@ from app.models.refugee import Refugee
 from datetime import datetime
 from sqlalchemy import or_, and_
 from werkzeug.utils import secure_filename
+import os, app, json
 
 # Test Route
 
@@ -60,7 +61,7 @@ def createNewRefugee():
     
     db.session.commit()
     ref_info={
-            'CampID' : id,
+            'CampID' : logged_in_camp.CampID,
             'Name'  :  new_refugee.Name,
             'Gender'  :  new_refugee.Gender,
             'Age'  :  new_refugee.Age,
@@ -71,7 +72,7 @@ def createNewRefugee():
             'CampAddress' : logged_in_camp.CampAddress
     }
 
-    print("REF:: " ,ref_info)
+    print("REF:: " ,ref_info, type(ref_info))
     return jsonify({"data": ref_info }),201
 
 # Deleting a refugee
@@ -268,6 +269,12 @@ def addAllRefugees():
 @bp.route('/api/post/refugee/csv',methods=["POST"])
 def addRefugee():
     # The csv file is converted to a JSON object and sent to this route
+    csv_file = request.files['file']
+    print("CSV FILE: ", csv_file)
+    if csv_file.filename != '':
+           file_path = os.path.join(app.config['UPLOAD_FOLDER'], csv_file.filename)
+          # set the file path
+           csv_file.save(file_path)
     
     # Making sure the user is logged in
     if not (camp_id := session.get("user_id")): # Python Walrus operator assignment expression
