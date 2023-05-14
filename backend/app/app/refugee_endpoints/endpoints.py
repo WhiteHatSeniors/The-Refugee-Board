@@ -86,8 +86,8 @@ def deleteRefugee(id):
     # You need to be logged in to delete a refugee
     if not session.get("user_id"):
         return jsonify({"error": "Not logged in"}), 403
-    
     ref = Refugee.query.get(id)
+    print(ref, id)
     # If the refugee doesn't exist
     if ref is None:
         return jsonify({"error": "Refugee not found"}),404

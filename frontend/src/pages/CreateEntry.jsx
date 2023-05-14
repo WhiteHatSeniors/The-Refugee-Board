@@ -16,7 +16,7 @@ function CreateEntry() {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const csvFile = useRef(null);
-    const [file, setFile] = useState("");
+    // const [file, setFile] = useState("");
 
     useEffect(() => {
         console.log(user, location.pathname)
@@ -111,8 +111,10 @@ function CreateEntry() {
 
 
     const handleFileChange = (e) => {
+        e.preventDefault()
         if (e.target.files) {
-            setFile(e.target.files[0]);
+            // setFile(e.target.files[0]);
+            let file = e.target.files[0];
             console.log(file)
             fetch('/api/post/refugee/csv', {
                 method: 'POST',
