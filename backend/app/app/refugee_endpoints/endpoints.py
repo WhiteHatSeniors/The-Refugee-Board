@@ -8,6 +8,7 @@ from datetime import datetime
 from sqlalchemy import or_, and_
 from werkzeug.utils import secure_filename
 import os, app, json
+import pandas as pd
 
 # Test Route
 
@@ -269,12 +270,16 @@ def addAllRefugees():
 @bp.route('/api/post/refugee/csv',methods=["POST"])
 def addRefugee():
     # The csv file is converted to a JSON object and sent to this route
-    csv_file = request.files['file']
-    print("CSV FILE: ", csv_file)
-    if csv_file.filename != '':
-           file_path = os.path.join(app.config['UPLOAD_FOLDER'], csv_file.filename)
-          # set the file path
-           csv_file.save(file_path)
+    print(request, request.data, request.files)
+    # data = pd.read_excel(request.data, engine='xlrd')
+    # print(data)
+    csv_file = request.files.get('file')
+    # print("CSV FILE: ", csv_file, request.files.getlist('files[]'))
+    # if csv_file.filename != '':
+    #        file_path = os.path.join(app.config['UPLOAD_FOLDER'], csv_file.filename)
+    #       # set the file path
+    #        csv_file.save(file_path)
+    #        print("CSV FILE: ", csv_file)
     
     # Making sure the user is logged in
     if not (camp_id := session.get("user_id")): # Python Walrus operator assignment expression
@@ -296,7 +301,7 @@ def addRefugee():
     except:
         return jsonify({"error": "Error adding refugees"}), 400
 
-    return jsonify(refugees),200
+    return jsonify({"data": refugees}),200
     
 
 # Updating a refugees details
