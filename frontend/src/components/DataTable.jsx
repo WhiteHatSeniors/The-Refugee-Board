@@ -5,6 +5,9 @@ import { FaTrash, FaEdit, FaCheckCircle } from "react-icons/fa";
 
 // const col = ["Name", "Gender", "CampName", "CountryOfOrigin", "Age", "Message", "MessageDate"]
 
+//DataTable: Component to display data as a table
+
+//Will return a string whose first letter is capitalized
 function capitalizeFirstLetter(str) {
 
     // converting first letter to uppercase
@@ -14,13 +17,12 @@ function capitalizeFirstLetter(str) {
 }
 
 
+//Table Headings
 const ThData = ({ column }) => column.map((data, id) => <th key={id} className='p-5'>{capitalizeFirstLetter(data.replace(/([A-Z])/g, ' $1').trim())}</th>)
 
+//Table data(body/rows)
 const TdData = ({ data, column, deleteEntry, editEntry, verifyEntry }) => {
     if (data) {
-        console.log(verifyEntry)
-        console.log(data)
-        // console.log(column)
         return data.map((data, id) => {
             return (
                 <tr key={id}>
@@ -42,23 +44,18 @@ const TdData = ({ data, column, deleteEntry, editEntry, verifyEntry }) => {
 }
 
 
-
+//DataTable combines ThData and TdData and uses pagination and state management to keep track of the pages
 export default function DataTable({ data, query, deleteEntry, editEntry, col, verifyEntry }) {
-    // console.log(data)
 
     // User is currently on this page
     const [currentPage, setCurrentPage] = useState(1);
     const recordsPerPage = 10;
     const nPages = !data ? 0 : Math.ceil(data.length / recordsPerPage);
-    console.log(data)
 
     const indexOfLastRecord = currentPage * recordsPerPage;
     const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-    console.log(data, indexOfFirstRecord, indexOfLastRecord)
     const currentRecords = !data ? "" : data.slice(indexOfFirstRecord, indexOfLastRecord);
 
-
-    console.log(data, currentRecords)
     if (data && data.length > 0) {
         let column = Object.keys(data[0]);
         column = column.filter(el => (el != "RefugeeID" && el != "CampID"))
@@ -79,9 +76,3 @@ export default function DataTable({ data, query, deleteEntry, editEntry, col, ve
     // else return <p className='text-red-500'>No information for now</p>
 
 }
-// data.map((post, index) => (
-//     <div key={index}>
-//         <p>{post.Name}</p>
-//         <p>{post.Age}</p>
-//     </div>
-// ))
